@@ -107,6 +107,7 @@ class AcrobatData(object):
     def acrobatSignAccessCheck(self, userinput):
         "This function captures the user id from Adobe Sign Rest API"
 
+        # Make API call using Python requests package
         url = "https://api.na3.adobesign.com/api/rest/v6/users/userByEmail"
 
         payload={}
@@ -116,9 +117,14 @@ class AcrobatData(object):
         }
         response = requests.request("GET", url, headers=headers, data=payload)
         
-        if response.status_code != 200:
+        # If response is 404 then user email does not exist in Adobe Sign
+        if response.status_code == 404:
             return False, None
-
+        # If response is not 404 and still not 200 then unknow error
+        elif response.status_code != 200:
+            #add code for alerting error for UI
+            print("response error GET users/userByEmail")
+            sys.exit()
         dic = json.loads(response.text)
         userid = dic["userId"]
         return True, userid
@@ -126,7 +132,8 @@ class AcrobatData(object):
     #Step 3
     def groupCheck(self, userID):
         "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
-        #Run API GET
+        
+        # Make API call using Python requests package
         url = "https://api.na3.adobesign.com/api/rest/v6/users/"+userID+"/groups"
 
         payload={}
@@ -138,6 +145,12 @@ class AcrobatData(object):
 
         #Parse JSON data into Dictionary
         groupsinfo = json.loads(response.text) 
+
+        # If response is not 200 then unkown error stop system
+        if response.status_code != 200:
+            #add code for alerting error for UI
+            print("response error Get users/userID/Groups")
+            sys.exit()
 
         info = groupsinfo["groupInfoList"]
         returnedinfo = []
@@ -163,8 +176,13 @@ class AcrobatData(object):
 
             response = requests.request("GET", url, headers=headers, data=payload)
 
-            groupusers = json.loads(response.text)
+            # If response is not 200 then unkown error stop system
+            if response.status_code != 200:
+                #add code for UI alert
+                print("response error groups/groupID/users")
+                sys.exit()
 
+            groupusers = json.loads(response.text)
             userlist = groupusers["userInfoList"]
             for i in userlist:
                 if i["isGroupAdmin"] == True:
