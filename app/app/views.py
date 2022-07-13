@@ -12,20 +12,15 @@ import pandas as pd # for reading csv
 class AcrobatData(object):
     "Grouping of methods that takes a user input and checks their Acrobat Sign access as well as giving them information on potential solutions if they do not pass validation"
 
-    def __init__(self, claimed_domains_file, users_esignatures_file, user_emails_cache, cached=False):  
+    def __init__(self, claimed_domains_file, users_esignatures_file, cached=False):  
         '''create instance and load data from local files. If emails_file is not N, this would be a cache
         claimed_domains_file (str): path to local file with claimed domains
-        user_emails_cache (str): path to local cache emails file (if cached is True). If cached is False,  
-            user email list will be downloaded and saved to that path so it can later be used as cache
-        
+
         Note: if some the read or write file operations fail, I simply bail out
         '''
 
         # make file paths into instance attributes
-        self.user_emails_cache = user_emails_cache
         self.users_esignatures_file = users_esignatures_file
-
-        self.user_emails = None
         self.users_esignatures = None
         self.bearer_id = None
 
@@ -42,30 +37,6 @@ class AcrobatData(object):
         
         # set bearer ID from config file 
         self.bearer_id = app.config["SECRET_KEY"]
-
-
-        if cached == True:
-            # load emails from cache. Single column csv file with Cached_emails as header
-            try:
-                users_df = pd.read_csv(self.user_emails_cache)
-            except Exception as e:
-                print("Error with opening", self.user_emails_cache, e)
-                sys.exit()  # This assumes that we can't run the app with this error, so I'm bailing out ..
-            
-            self.user_emails = users_df["Email"].to_list() # make emails list from that column
-        
-        else: # download emails and store as cache file
-            self.user_emails = self.loadUserList()
-            header = ["Email", "ID"] 
-            df = pd.DataFrame(self.user_emails, 
-                   columns=header)
-            #df = pd.DataFrame({"Cached_emails": self.user_emails}) # column name is Cached_emails
-            try:
-                df.to_csv(self.user_emails_cache, index=False) # no index column
-            except Exception as e:
-                print("Error writing emails cache", self.user_emails_cache, e)
-                # Not stopping here b/c technically we can continue, it's just that the next 
-                # loading cache will fail.
             
     #Step 1
     def emailvalidation(self, email):
@@ -224,7 +195,6 @@ def signcheck():
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
             users_esignatures_file="data_files/dtm_esignature_users.csv",
-            user_emails_cache="data_files/user_info.csv",
             cached=True)
 
     if request.method == "POST":
@@ -286,7 +256,7 @@ def clienttools():
         # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
             users_esignatures_file="data_files/dtm_esignature_users.csv",
-            user_emails_cache="data_files/user_info.csv",
+            user_email="data_files/user_info.csv",
             cached=True)
     if request.method == "POST":
         userinput = request.form["useremail"]
