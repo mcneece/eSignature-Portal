@@ -1,0 +1,129 @@
+.optum-logo-ora-rgb {
+    margin-left: 20px;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+.home-title-text {
+    color: #FFFFFF;
+    font-family: "Gill Sans";
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 0;
+    padding-left: 20px;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+.home-title-rectangle {
+    box-sizing: border-box;
+    border: 1px solid #979797;
+    background-color: #3A3B3D;
+}
+.home-search-header-text {
+    color: #000000;
+    font-family: "Gill Sans";
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 0;
+}
+.home-search-rectangle {
+        padding: 17px;
+        padding-left: 55px;
+        width: 572px;
+        border-radius: 35px;
+        font-size: 13px;
+        color: grey;
+        background-color: #DDDDDD;
+        background-repeat: no-repeat;
+        background-position: left center;
+        outline: 0;
+        cursor: pointer;
+}      
+.search-icon {
+        height: 31.51px;
+        width: 31.51px;
+}
+.home-search-display-text {
+    height: 44px;
+    width: 522px;
+    color: #000000;
+    font-family: "Gill Sans";
+    font-size: 38px;
+    font-weight: bold;
+    letter-spacing: 0;
+    line-height: 44px;
+}
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #FF612B;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #FF612B;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  .sliderspace{
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+  .breadcrumbpadding{
+    padding-left: 10px;
+    padding-top: 5px;
+  }
+  .card {
+    margin: 0 auto; /* Added */
+    float: none; /* Added */
+    margin-bottom: 10px; /* Added */
+}

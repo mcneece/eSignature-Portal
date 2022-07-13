@@ -1,0 +1,53 @@
+{% extends "client/templates/public_template.html" %}
+<!-- This Jinja syntax extends my html template to this html file  -->
+
+<!-- Site Title -->
+{% block title %}eSign Support - Request Access{% endblock %}
+
+<!-- Top Nav Bar -->
+{% block nav1 %}<a class="nav-link disabled" href="#">Open Ticket</a>{% endblock %}
+{% block nav2 %}<a class="nav-link active" aria-current="true" href="/request-access">Request Access</a>{% endblock %}
+{% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Request Access</li>
+{% endblock %}
+
+{% block main %}
+<!-- Details/Form Card -->
+<div class="row">
+    <div class="col-sm-6">
+        <div class="card border-primary mx-3">
+            <div class="card-body">
+                <h5 class="card-title">Adobe Acrobat Sign Access Check</h5>
+                <p class="card-text">
+                    Requesting access to Adobe Acrobat Sign is a multi-step process that requires action from the
+                    end-user
+                    and the eSignature Support Team. To simplify the request process please fill in your business email
+                    below, once submitted this webpage will generate detailed instructions on the steps needed to
+                    request
+                    access for the inputted user email. Steps will vary depending on where you are in the request
+                    process.
+                </p>
+                <hr>
+                <form action="/request-access" method="POST">
+                    <div class="form-group">
+                        <div>
+                            <label class="mb-1">Enter Your Work Email</label>
+                        </div>
+                        <input type="search" id="useremail" class="home-search-rectangle" name="useremail"
+                            spellcheck="false" placeholder="example@domain.com" />
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Alert Card -->
+    <div class="col-sm-6">
+        <!-- This Jinja code snippet allows me to pass html code from my python file to trigger an alert message. -->
+        {{ alert|safe }}
+    </div>
+</div>
+    {% endblock %}

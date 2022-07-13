@@ -1,0 +1,51 @@
+{% extends 'client/templates/client_tools_template.html' %}
+<!-- This Jinja syntax extends my html template to this html file  -->
+
+{% block nav1 %}<a class="nav-link active" aria-current="true" href="/find-admin">Find Group Admin</a>{% endblock %}
+{% block nav2 %}<a class="nav-link disabled">Cancel Agreements</a>{% endblock %}
+{% block nav3 %}<a class="nav-link disabled">Lookup Webforms</a>{% endblock %}
+
+{% block main %}
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card border-primary mx-3">
+      <div class="card-body start-0">
+        <h5 class="float-start">Find Group Admin</h5>
+        <hr>
+        <p class="card-text float-start">
+          Group Admin's in Adobe Sign are individual who over see a specific group in Adobe Sign.
+          By finding your group admin you can contact them to request access to their group, or
+          to discuss changes that need to be made to the group settings.
+        </p>
+        <hr>
+        <form action="/find-admin" method="POST">
+          <div class="form-group">
+            <!-- Toggle HTML  -->
+            <div class="sliderspace float-start"> Search Email or Group
+              <label class="switch align-middle" onclick="toggleSlider()">
+                <input type="checkbox" id="slider">
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <input type="search" id="mySearch" style="display: none;" class="home-search-rectangle" spellcheck="false"
+              placeholder="Enter a Colleagues Email Address (That Has An Existing Acrobat Sign Account)"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+              title="This top tooltip is themed via CSS variables." />
+            <input type="search" id="mySearch2" class="home-search-rectangle" spellcheck="false"
+              placeholder="Enter the Name of an Adobe Sign Group" />
+            <button type="submit" class="btn btn-primary float-start mt-2">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <!-- This Jinja code snippet allows me to pass html code from my python file to trigger an alert message. -->
+      {{ alert|safe }}
+    </div>
+  </div>
+  <!--Search Display Text and Search Bar for Email Address and Group-->
+  <script src="{{ url_for('static', filename='js/find-admin.js')}}"></script>
+  {% endblock %}
+  </body>
+
+  </html>
