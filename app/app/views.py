@@ -104,74 +104,24 @@ class AcrobatData(object):
 
 
     #Step 2
-    def loadUserList(self):
-        "This function loads the user list from the Adobe Sign Rest API"
-        #These elements will be blank and used in the below while loop
-        emails = tuple()
-        nextcursor = ""
+    def acrobatSignAccessCheck(self, userinput):
+        "This function captures the user id from Adobe Sign Rest API"
 
-        while True:
-        #If next cursor is blank this is the first time through the loop
-            if nextcursor == "":
-                url = "https://api.na3.adobesign.com/api/rest/v6/users?pagesize=5000"
-            #If next cursor is NOT blank there is more pages to run through
-            else:
-                nextcursor = "?cursor=" + nextcursor
-                url = "https://api.na3.adobesign.com/api/rest/v6/users"+nextcursor+"&pageSize=5000"
-            
-            payload={}
-            headers = {
-                'Authorization': self.bearer_id
-            }
-            #JSON Data
-            response = requests.request("GET", url, headers=headers, data=payload)
-            if response.status_code != 200:
-                print(response.status_code)
-                sys.exit
-            #Run the emailist function to get a list of emails and a nextcursors from the JSON data and put it in lists
-            useremailsandid, nextcursor = self.parseJSONUsers(response) # catch the 2 returns
+        url = "https://api.na3.adobesign.com/api/rest/v6/users/userByEmail"
 
-            if nextcursor == None: # go no new cursor, so we're done
-                return emails
-            else: # collect new user emails and go agin with next cursor
-                emails += useremailsandid
+        payload={}
+        headers = {
+        'x-email': userinput,
+        'Authorization': self.bearer_id
+        }
+        response = requests.request("GET", url, headers=headers, data=payload)
+        
+        if response.status_code != 200:
+            return False, None
 
-    def acrobatSignAccessCheck(self, user_email):
-        "This Function takes the user input and returns boolean: True (if email finds a match in the Loaded User List) and User ID, or Boolean: False"
-
-        if user_email in self.user_emails:
-            try:
-                users_df = pd.read_csv(self.user_emails_cache)
-            except Exception as e:
-                print("Error with opening", self.user_emails_cache, e)
-                sys.exit()  # This assumes that we can't run the app with this error, so I'm bailing out ..
-            userid = users_df.query('Email==@ user_email')['ID'] #query the dataframe to find the ID that corresponds with the email
-            useridstr = str(userid.values[0]) #turn panda array of 1 value into string to return
-            return True, useridstr
-
-        return False, None # _ is a valid variable name, short for IDC
-
-    def parseJSONUsers(self, jsondata):
-        "This function will return an [email and ID] list, and nextcursor if applicable"
-        #Parse JSON response into a Dictionary of two items (userInfoList:, Page:)
-        api_users = json.loads(jsondata.text)
-
-        #This list will be used to capture all the emails in the 'user' dictionary later on
-        emailandIDlist = [] 
-
-        #This variable is a list of Dictionaries, inside each item is the follow dictionary keys (email:, company:, id:, isAccountAdmin:, accountId:)
-        users = api_users["userInfoList"]
-
-        #This for loop goes through each item in the variable list(users) and grabs the email and saves it to the variable list(emailandIDlist)
-        emailandIDlist = [(d['email'], d['id']) for d in users]
-
-        #Page is a dictionary item with another dictionary item inside it called nextCursor. The next cursor is captured and used in subsequent API calls to get the next page.
-        page = api_users["page"]  
-        if len(page) != 0:
-            nextcursor = page["nextCursor"]
-            return emailandIDlist, nextcursor #There is more pages
-        else:
-            return emailandIDlist, None
+        dic = json.loads(response.text)
+        userid = dic["userId"]
+        return True, userid
 
     #Step 3
     def groupCheck(self, userID):
@@ -267,7 +217,7 @@ def signcheck():
         result, domain = ad.emailvalidation(userinput)
         if result == True: # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
             # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
-            result, userId = ad.acrobatSignAccessCheck(userinput) #Returns True and user ID if their is a match, returns false if their isn't a match
+            result, userId = ad.acrobatSignAccessCheck2(userinput) #Returns True and user ID if their is a match, returns false if their isn't a match
             #Step 2 Passed: Adobe Acrobat Sign Access Check, user has an Adobe Acrobat Sign Account   
             if result == True: 
                 # Step 3: Run a group check on the user that passed Adobe Acrobat Sign Access Check
