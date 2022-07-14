@@ -67,7 +67,6 @@ class AcrobatData(object):
         else:
             return "invalid_domain", domainname
 
-
     #Step 2
     def acrobatSignAccessCheck(self, userinput):
         "This function captures the user id from Adobe Sign Rest API"
