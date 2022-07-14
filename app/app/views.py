@@ -46,11 +46,9 @@ class AcrobatData(object):
         num_at = email.count("@")
         if num_at != 1: return "email format invalid: must have only one \'@\' character"
         
-        # How many chars in username?
+        # Split username and domainname
         l = email.split("@")
         username, domainname = l[0], l[1]
-        if len(username) < 3 or len(username) > 16: 
-            return "email format invalid: local-part (\'before @ sign\') must contain 3 - 16 alfanumaric characters"
         
         # how many dots in domain name?
         if domainname.count(".") != 1:
@@ -58,10 +56,6 @@ class AcrobatData(object):
         
         # split into B and C 
         B, C = domainname.split(".")
-        
-        # how many chars in B?
-        if len(B) < 2 or len(B) > 8:
-            return "domain name before '.' must contain 2 - 8 alfanum chars"
         
         # is C legit?
         if C not in ["com", "edu", "org", "gov"]: 
@@ -195,7 +189,7 @@ def signcheck():
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
             users_esignatures_file="data_files/dtm_esignature_users.csv",
-            cached=True)
+            cached=True) # will use this value later on when I implement powershell script for AD lookup
 
     if request.method == "POST":
         userinput = request.form["useremail"]
@@ -205,7 +199,7 @@ def signcheck():
         result, domain = ad.emailvalidation(userinput)
         if result == True: # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
             # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
-            result, userId = ad.acrobatSignAccessCheck2(userinput) #Returns True and user ID if their is a match, returns false if their isn't a match
+            result, userId = ad.acrobatSignAccessCheck(userinput) #Returns True and user ID if their is a match, returns false if their isn't a match
             #Step 2 Passed: Adobe Acrobat Sign Access Check, user has an Adobe Acrobat Sign Account   
             if result == True: 
                 # Step 3: Run a group check on the user that passed Adobe Acrobat Sign Access Check
@@ -256,8 +250,7 @@ def clienttools():
         # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
             users_esignatures_file="data_files/dtm_esignature_users.csv",
-            user_email="data_files/user_info.csv",
-            cached=True)
+            cached=True) # will use this value later on when I implement powershell script for AD lookup
     if request.method == "POST":
         userinput = request.form["useremail"]
         print("Group Admin Check", userinput)
