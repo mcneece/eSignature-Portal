@@ -9,17 +9,21 @@
 <div class="row">
   <div class="col-sm-6">
     <div class="card border-primary mx-3">
-      <div class="card-body">
-        <h5 align="left">Find Group Admin</h5>
-        <p class="card-text" align="left">Group Admin's in Adobe Sign are individual who over see a specific group in Adobe Sign. By finding your group admin you can contact them to request access to their group, or to discuss changes that need to be made to the group settings.</p>
+      <div class="card-body" align="left">
+        <h5>Find Group Admin</h5>
+        <p class="card-text">Group Admin's in Adobe Acrobat Sign are individuals who over see a specific group of users. Using this tool you can find your group admin and contact them to request access to their group, or to discuss changes that need to be made to the overall group settings.</p>
+        <hr>
+        <p>You can find an admin by entering the name of an existing group, or by entering an active users email. If you choose to search by email this  will return that users' admin.</p>
         <hr>
         <form action="/find-admin" method="POST">
           <div>
-            <p align="left">Search by Email or Group</p>
+            <p>Search by Email or Group</p>
           </div>
           <div class="form-group">
             <!-- Toggle HTML  -->
-            <div class="sliderspace float-start">Group
+            <div class="sliderspace float-start">
+              <label id="group_label">Group</label>
+              <label id="email_label" style="display: none;">Email</label>
               <label class="switch align-middle" onclick="toggleSlider()">
                 <input type="checkbox" id="slider">
                 <span class="slider round"></span>
@@ -29,9 +33,9 @@
               <input type="search" id="mySearch" style="display: none;" class="home-search-rectangle" spellcheck="false"
                 placeholder="Enter a Colleagues Email Address"
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                title="This top tooltip is themed via CSS variables." />
+                title="This top tooltip is themed via CSS variables." name="email" />
               <input type="search" id="mySearch2" class="home-search-rectangle" spellcheck="false"
-                placeholder="Enter the Name of an Adobe Sign Group" />
+                placeholder="Enter the Name of an Acrobat Sign Group" name="group"/>
             </div>
             <button type="submit" class="btn btn-primary float-start mt-2">Submit</button>
           </div>

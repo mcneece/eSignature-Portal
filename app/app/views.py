@@ -44,7 +44,7 @@ class AcrobatData(object):
         
         # How many @ signs?
         num_at = email.count("@")
-        if num_at != 1: return "email format invalid: must have only one \'@\' character"
+        if num_at != 1: return "email format invalid: must have only one \'@\' character", None
         
         # Split username and domainname
         l = email.split("@")
@@ -52,14 +52,14 @@ class AcrobatData(object):
         
         # how many dots in domain name?
         if domainname.count(".") != 1:
-            return "domain-name must have exactly one '.'!"
+            return "domain-name must have exactly one '.'!", None
         
         # split into B and C 
         B, C = domainname.split(".")
         
         # is C legit?
         if C not in ["com", "edu", "org", "gov"]: 
-            return "domain name must be one of the following: .com, .edu, .org, .gov"
+            return "domain name must be one of the following: .com, .edu, .org, .gov", domainname
     
         # is domain inside the valid_domains list?
         if domainname in self.valid_domains:
@@ -250,45 +250,50 @@ def clienttools():
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
             users_esignatures_file="data_files/dtm_esignature_users.csv",
             cached=True) # will use this value later on when I implement powershell script for AD lookup
+    
     if request.method == "POST":
-        userinput = request.form["useremail"]
-        print("Group Admin Check", userinput)
+        email = request.form["email"]
+        group = request.form ["group"]
 
-         #Step 1: Email Validation, this check will verify if the user input is a valid email
-        result, domain = ad.emailvalidation(userinput)
-        if result == True: # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
+        # If the user submited information in the email search run email search code:
+        if email != "" and group =="":
+            print("Admin Email Check", email)
 
-            # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
-            result, userId = ad.acrobatSignAccessCheck(userinput) #Returns True and user ID if their is a match, returns false if their isn't a match
-            #Step 2 Passed: Adobe Acrobat Sign Access Check, user has an Adobe Acrobat Sign Account   
-            if result == True: 
-                # Step 3: Run a group check on the user that passed Adobe Acrobat Sign Access Check
-                groupnameandid = ad.groupCheck(userId) #using the user ID, return the group (name, Id) that they are apart of
-                groups = []
-                for i in groupnameandid:
-                    group = str(i[0])
-                    groups.append(group)
-                # Step 3 Failed: User is in Default Group        
-                if len(groups) == 1 and group == "Default Group": #User is part of default group (needs to get added to a group)
-                    alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Missing Group Assignment</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user "+userinput+" has an account in Acrobat Sign but by default all accounts created in Acrobat Sign will not have the ability to send.</p><p class=\"mb-1\">You will need to contact your group admin to add you to the appropriate group.</p>Don't know your group admin? No Problem! Find your group admin with this <a href=\"/groupadmin\" class=\"alert-link\">link to our Find Group Admin Tool</a></div></div>"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-                    print("User in Default Group")
-                    return render_template("client/admin_lookup.html", alert = alert) #renders HTML template and passed Alert which is HTML that gets appended
-                # Step 3 Passed: Using is in a group and active            
+            #Step 1: Email Validation, this check will verify if the user input is a valid email
+            result, domain = ad.emailvalidation(email)
+            if result == True: # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
+
+                # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
+                result, userId = ad.acrobatSignAccessCheck(email) #Returns True and user ID if their is a match, returns false if their isn't a match
+                #Step 2 Passed: Adobe Acrobat Sign Access Check, user has an Adobe Acrobat Sign Account   
+                if result == True: 
+                    # Step 3: Run a group check on the user that passed Adobe Acrobat Sign Access Check
+                    groupnameandid = ad.groupCheck(userId) #using the user ID, return the group (name, Id) that they are apart of
+                    groups = []
+                    for i in groupnameandid:
+                        group = str(i[0])
+                        groups.append(group)
+                    # Step 3 Failed: User is in Default Group        
+                    if len(groups) == 1 and group == "Default Group": #User is part of default group (needs to get added to a group)
+                        alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Missing Group Assignment</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user "+userinput+" has an account in Acrobat Sign but by default all accounts created in Acrobat Sign will not have the ability to send.</p><p class=\"mb-1\">You will need to contact your group admin to add you to the appropriate group.</p>Don't know your group admin? No Problem! Find your group admin with this <a href=\"/groupadmin\" class=\"alert-link\">link to our Find Group Admin Tool</a></div></div>"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                        print("User in Default Group")
+                        return render_template("client/admin_lookup.html", alert = alert) #renders HTML template and passed Alert which is HTML that gets appended
+                    # Step 3 Passed: Using is in a group and active            
+                    else:
+                        # Create a list of IDs
+                        adminlist = ad.usersInGroup(groupnameandid) #using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
+                        alert="<div class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p>"
+                # Step 1 Failed: User does not have an Acrobat Sign Account
                 else:
-                    # Create a list of IDs
-                    adminlist = ad.usersInGroup(groupnameandid) #using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
-                    alert="<div class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p>"
-            # Step 1 Failed: User does not have an Acrobat Sign Account
-            else:
-                alert="<div class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">No Account Found</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user "+userinput+" does not have an account in Adobe Acrobat Sign.</p><p class=\"mb-1\">Please try a different colleague.</p></div>"
-                print("Failed: No Account For Colleague")
+                    alert="<div class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">No Account Found</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user "+userinput+" does not have an account in Adobe Acrobat Sign.</p><p class=\"mb-1\">Please try a different colleague.</p></div>"
+                    print("Failed: No Account For Colleague")
+                    return render_template("client/admin_lookup.html", alert = alert)
+            # Step 1 Failed: users domain is not claimed in the UHG console
+            elif result == "invalid_domain":
+                alert="<div class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain "+domain+" is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign. If you would like to discuss next steps please open a ticket with the eSignature Support Team</p><p class=\"mb-1\">Please follow the link to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://atlas.uhg.com/contactLanding/openTicket#\">open a ticket</a></p></div>"
+                print("Access Check: Unclaimed Domain")
                 return render_template("client/admin_lookup.html", alert = alert)
-        # Step 1 Failed: users domain is not claimed in the UHG console
-        elif result == "invalid_domain":
-            alert="<div class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain "+domain+" is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign. If you would like to discuss next steps please open a ticket with the eSignature Support Team</p><p class=\"mb-1\">Please follow the link to <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://atlas.uhg.com/contactLanding/openTicket#\">open a ticket</a></p></div>"
-            print("Access Check: Unclaimed Domain")
-            return render_template("client/admin_lookup.html", alert = alert)
-        else: 
-            print("Need to add code at end of admin lookup module")
+            else: 
+                print("Need to add code at end of admin lookup module")
     
     return render_template("client/admin_lookup.html")
