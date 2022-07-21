@@ -17,6 +17,7 @@
 <h1>Using The Tool</h1>
         
 <h3>Step 1: Creating a config.py file</h3>
+<p>Save this file in the app directory of this project<p>
     
     class Config(object):
         DEBUG = False
@@ -41,3 +42,8 @@
         SESSION_COOKIE_SECURE = False
 
 <h3>Step 2: Download requirements.txt</h3>
+
+```python
+    pip install -r /path/to/requirements.txt
+```
+
