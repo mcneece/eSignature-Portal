@@ -12,7 +12,7 @@
 </ul>
 
 <h3>One Stop Shop For Everything Acrobat Sign</h3>
-<p></p>
+<p>In addition to simplifying functionality for the common user, the eSignature Support Portal also is the hub for: curreated training material for novice to expert Acrobat Sign users, the fastest routes to submitting service requests to the eSignature Opperations Team, and links to the Adobe Sign tool for beginner users.</p>
     
 <h1>Using The Tool</h1>
         
