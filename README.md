@@ -17,7 +17,28 @@
 <h1>Using The Tool</h1>
         
         SECRET_KEY = #Insert Sandbox Access Token w/ User Read Privileges
-        REQUEST_URL = # Insert Request URL from Adobe Sign API (can be found on Swagger page for Rest API v6)   
+        
 <h3>Step 1: Creating a config.py file</h3>
+    class Config(object):
+        DEBUG = False
+        TESTING = False
+        SECRET_KEY = # Insert PRODUCTION Access Token w: USER READ prviliges
+        REQUEST_URL = # Insert Request URL for PRODUCTION Adobe Sign API
+        SESSION_COOKIE_SECURE = True
+
+    class ProductionConfig(Config):
+        pass
+
+    class DevelopmentConfig(Config):
+        DEBUG = True
+        SECRET_KEY = # Insert SANDBOX Access Token w: USER READ prviliges
+        REQUEST_URL = # Insert Request URL for SANDBOX Adobe Sign API
+        SESSION_COOKIE_SECURE = False
+
+    class TestingConfig(Config):
+        TESTING = True
+        SECRET_KEY = # Insert SANDBOX Access Token w: USER READ prviliges
+        REQUEST_URL = # Insert Request URL for SANDBOX Adobe Sign API
+        SESSION_COOKIE_SECURE = False
 
 <h3>Download requirements.txt</h3>
