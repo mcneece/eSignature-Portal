@@ -18,7 +18,7 @@
         
 <h3>Step 1: Creating a config.py file</h3>
 <p>Save this file in the app directory of this project<p>
-    
+```python    
     class Config(object):
         DEBUG = False
         TESTING = False
@@ -40,10 +40,10 @@
         SECRET_KEY = # Insert SANDBOX Access Token w: USER READ prviliges
         REQUEST_URL = # Insert Request URL for SANDBOX Adobe Sign API
         SESSION_COOKIE_SECURE = False
-
+```
 <h3>Step 2: Download requirements.txt</h3>
 
-```python
+```console
     pip install -r /path/to/requirements.txt
 ```
 
