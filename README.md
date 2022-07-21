@@ -48,4 +48,18 @@
 ```console
     pip install -r /path/to/requirements.txt
 ```
+<h3>Step 3: Run Commands in Termainal to Run Flask Project</h3>
 
+```console
+    cd app
+```
+```console
+    source env/bin/activate
+```
+```console
+    export FLASK_APP=run.py
+```
+```console
+    export FLASK_ENV=production
+```
+<p>Select the link provided in the terminal</p>
