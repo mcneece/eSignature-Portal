@@ -26,7 +26,7 @@ class AcrobatData(object):
         self.users_esignatures_file = users_esignatures_file
         self.users_esignatures = None
         self.bearer_id = None
-
+        self.request_url = None
         self.cached = cached
 
         # using pandas to read in the csv file as a dataframe and then extract each column I need as a list
@@ -39,8 +39,9 @@ class AcrobatData(object):
 
         self.valid_domains = domains_df["Domain"].to_list()
 
-        # set bearer ID from config file
+        # set bearer ID and URL from config file
         self.bearer_id = app.config["SECRET_KEY"]
+        self.request_url = app.config["REQUEST_URL"]
 
     # Step 1
     def emailvalidation(self, email):
@@ -77,7 +78,7 @@ class AcrobatData(object):
         "This function takes an email as a parameter and runs a GET user/userEmail API call to Acrobat Sign returning email:'', id:'',isAccountAdmin:''"
 
         # Make API call using Python requests package
-        url = "https://api.na3.adobesign.com/api/rest/v6/users/userByEmail"
+        url = self.request_url+"users/userByEmail"
 
         payload = {}
         headers = {
@@ -106,7 +107,7 @@ class AcrobatData(object):
         "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
 
         # Make API call using Python requests package
-        url = "https://api.na3.adobesign.com/api/rest/v6/users/"+userID+"/groups"
+        url = self.request_url+userID+"/groups"
 
         payload = {}
         headers = {
@@ -137,7 +138,7 @@ class AcrobatData(object):
     def usersInGroup(self, groupID, groupName):
         "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
 
-        url = "https://api.na3.adobesign.com/api/rest/v6/groups/"+groupID+"/users"
+        url = self.request_url+"groups/"+groupID+"/users"
 
         payload = {}
         headers = {
@@ -182,7 +183,7 @@ class AcrobatData(object):
     # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     def grouplist(self, groupName):
-        url = "https://api.na3.adobesign.com/api/rest/v6/groups?pageSize=500"
+        url = self.request_url+"groups?pageSize=500"
 
         payload = {}
         headers = {
