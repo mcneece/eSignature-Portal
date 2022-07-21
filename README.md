@@ -9,7 +9,15 @@
     <li>Supplying end users with the ability to find a Group Admins by entering a {group name} or {email of a colleague} whom has Acrobat Sign access.</li>
     <li>Gives end users the ability to cancel agreements sent out for signature in bulk.</li>
     <li>Supplies end users with information regarding who is the owner of a specific webform in Adobe Sign</li>
-<ul>
+</ul>
 
 <h3>One Stop Shop For Everything Acrobat Sign</h3>
 <p></p>
+    
+<h1>Using The Tool</h1>
+        
+        SECRET_KEY = #Insert Sandbox Access Token w/ User Read Privileges
+        REQUEST_URL = # Insert Request URL from Adobe Sign API (can be found on Swagger page for Rest API v6)   
+<h3>Step 1: Creating a config.py file</h3>
+
+<h3>Download requirements.txt</h3>
