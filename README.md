@@ -1,6 +1,6 @@
 <img src="Docs/readme_imgs/icon.png" align="right" />
 <h1>Optum eSignature Support Portal</h1>
-<p>The eSignature Support Portal was built by Jacob McNeece to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for commmon service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that the can be self sufficient when utilizing eSignature for their business(es).</p>
+<p>The eSignature Support Portal was built by Jacob McNeece to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for common service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that the can be self sufficient when utilizing eSignature for their business(es).</p>
 
 <h3>API Calls Simplified</h3>
 <p>Adobe Acrobat Sign has many different features and functionalities to match a user's requirements for sending out a document for signiture, but not all can be done from the browser solution. Some requires development skills and knowledge of making API calls to Adobe for fetching information or making bulk requests. With the release of the eSignature Support Portal this can all be done by a click of a button and zero development skills.</p>
