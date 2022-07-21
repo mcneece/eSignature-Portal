@@ -16,9 +16,8 @@
     
 <h1>Using The Tool</h1>
         
-        SECRET_KEY = #Insert Sandbox Access Token w/ User Read Privileges
-        
 <h3>Step 1: Creating a config.py file</h3>
+    
     class Config(object):
         DEBUG = False
         TESTING = False
