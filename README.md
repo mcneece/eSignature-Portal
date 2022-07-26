@@ -2,8 +2,6 @@
 
 # Optum eSignature Support Portal
 
-<img src="Docs/readme_imgs/home_page.png" align="center" />
-
 <p>The eSignature Support Portal was built by Jacob McNeece to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for common service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that the can be self sufficient when utilizing eSignature for their business(es).</p>
 
 ### API Calls Simplified
@@ -19,6 +17,8 @@
 ### One Stop Shop For Everything Acrobat Sign
 
 <p>In addition to simplifying functionality for the common user, the eSignature Support Portal also is the hub for: curreated training material for novice to expert Acrobat Sign users, the fastest routes to submitting service requests to the eSignature Opperations Team, and links to the Adobe Sign tool for beginner users.</p>
+
+<img src="Docs/readme_imgs/home_page.png" align="center" />
     
 ## Installation
         
