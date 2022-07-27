@@ -68,6 +68,9 @@
 ```console
     export FLASK_ENV=production
 ```
+```console
+    flask run
+```
 <p>Select the link provided in the terminal<p>
 
 ```console
