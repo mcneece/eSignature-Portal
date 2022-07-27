@@ -156,7 +156,7 @@ class AcrobatData(object):
         # Creates a dictionary for grabing admins:
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
-        for i in jsondata["GroupUsersInfo"]:
+        for i in jsondata["GroupUserInfo"]:
             if i["isGroupAdmin"] == True:
                 listofadmins[groupName].append(i)
         return listofadmins
