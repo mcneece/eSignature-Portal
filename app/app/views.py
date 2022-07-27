@@ -26,7 +26,6 @@ class AcrobatData(object):
         self.users_esignatures_file = users_esignatures_file
         self.users_esignatures = None
         self.bearer_id = None
-        self.request_url = None
         self.cached = cached
 
         # using pandas to read in the csv file as a dataframe and then extract each column I need as a list
@@ -41,7 +40,6 @@ class AcrobatData(object):
 
         # set bearer ID and URL from config file
         self.bearer_id = app.config["SECRET_KEY"]
-        self.request_url = app.config["REQUEST_URL"]
 
     # Step 1
     def emailvalidation(self, email):
@@ -78,7 +76,7 @@ class AcrobatData(object):
         "This function takes an email as a parameter and runs a GET user/userEmail API call to Acrobat Sign returning email:'', id:'',isAccountAdmin:''"
 
         # Make API call using Python requests package
-        url = self.request_url+"users/userByEmail"
+        url = app.config["REQUEST_URL_USERS"]
 
         payload = {}
         headers = {
@@ -107,7 +105,7 @@ class AcrobatData(object):
         "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
 
         # Make API call using Python requests package
-        url = self.request_url+userID+"/groups"
+        url = app.config["REQUEST_URL_GROUPS"]
 
         payload = {}
         headers = {
@@ -130,7 +128,7 @@ class AcrobatData(object):
         groupinfo = jsondata["groupInfoList"]
         returnedinfo = []
         for i in groupinfo:  # For each group the user is apart of grab the name and groupid
-            nameandid = (i["name"], i["id"])
+            nameandid = (i["groupName"], i["groupId"])
             returnedinfo.append(nameandid)
         return returnedinfo
 
@@ -138,7 +136,7 @@ class AcrobatData(object):
     def usersInGroup(self, groupID, groupName):
         "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
 
-        url = self.request_url+"groups/"+groupID+"/users"
+        url = app.config["REQUEST_URL_GROUPS"]+groupID+"/users"
 
         payload = {}
         headers = {
@@ -183,7 +181,7 @@ class AcrobatData(object):
     # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     def grouplist(self, groupName):
-        url = self.request_url+"groups?pageSize=500"
+        url = app.config["REQUEST_URL_GROUPS"]+"?pageSize=500"
 
         payload = {}
         headers = {
