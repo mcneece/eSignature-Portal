@@ -156,7 +156,7 @@ class AcrobatData(object):
         # Creates a dictionary for grabing admins:
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
-        for i in jsondata["GroupUserInfo"]:
+        for i in jsondata["userInfoList"]:
             if i["isGroupAdmin"] == True:
                 listofadmins[groupName].append(i)
         return listofadmins
@@ -402,3 +402,8 @@ def cancelnator():
     # if no comment give error
 
     return render_template("client/cancelnator.html")
+
+@app.route("/open-ticket")
+def openticket():
+    "This is the weppage users will visit to open one of the following tickets (Incident, Net New, Enhancement)"
+    return render_template("client/openticket.html")

@@ -1,0 +1,74 @@
+{% extends 'client/templates/public_template.html' %}
+<!-- This Jinja syntax extends my html template to this html file  -->
+
+<!-- Site Title -->
+{% block title %}eSign Support - Open a ticket{% endblock %}
+
+<!-- Site Top Nav Bar  -->
+{% block nav1 %}<a class="nav-link active" href="/open-ticket">Open Ticket</a>{% endblock %}
+{% block nav2 %}<a class="nav-link" href="/request-access">Request Access</a>{% endblock %}
+{% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Open a Ticket</li>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+    <div class="col">
+        <div class="card border-info">
+            <div class="card-header">
+                Acrobat Sign Incident/Service Request
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Having an issue with Acrobat Sign?</h5>
+                <p class="card-text">If you are running into an issue with Adobe Acrobat Sign, or need assistance from the eSignature Support Team please submit a ticket by following the link below:</p>
+                <a target="_blank"
+                    href=""
+                    class="btn btn-primary">Create Ticket</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="card border-info">
+            <div class="card-header">
+                New Business Intake Request
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Need eSignature For Your Business?</h5>
+                <p class="card-text">If your business does not have a group setup in Adobe Acrobat Sign and you are
+                    interested in creating one please create an intake request in ServiceNow. You will need to
+                    follow the below steps:</p>
+                <ol>
+                    <li>Select "NewBusiness/Need" from "Select an eSignature Reqest Type".</li>
+                    <li>Fill out remaining questions specific to your businesses eSignature needs.</li>
+                    <li>Click Submit.</li>
+                </ol>
+                <a target="_blank"
+                    href="https://optum.service-now.com/euts_intake?id=euts_sc_cat_item_form&sys_id=bba6b983db0abf4098e940ceaa961975&sysparm_category=f83bba03db83ff40a937ee82ca961905"
+                    class="btn btn-primary">Create Request</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="card border-info">
+            <div class="card-header">
+                Enhancement Request
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Does Adobe's eSiganture Tool Have Missing Funcitonality Vitial To Your Business?</h5>
+                <p class="card-text">Follow the ServiceNow enhancment request form to submit a request to Adobe to review potential upgrades to their global eSignature solution (Acrobat Sign). Please fill in all answer with in depth details to ensure your request legitimized by our internal IT Team.
+                    It will be reviewed and our support team will reach out with questions to vet this process before sending it off to Adobe.</p>
+                <a target="_blank"
+                    href="#"
+                    class="btn btn-primary">Submit Enhancement Request</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
