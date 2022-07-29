@@ -28,58 +28,38 @@
         <div class="col offset-sm-1">
             <h4>Links to Adobe Acrobat Sign</h4>
             <div class="mx-3">
-                <a href="https://unitedhg.na3.adobesign.com/account/homeJS" target="_blank" class="btn btn-primary btn-lg">Acrobat Sign Production</a>
-                <a href="https://na1.documentssandbox.adobe.com/account/homeJS" target="_blank" class="btn btn-secondary btn-lg">Acrobat Sign Sandbox (Test)</a>
+                <a href="https://unitedhg.na3.adobesign.com/account/homeJS" target="_blank"
+                    class="btn btn-primary btn-lg">Acrobat Sign Production</a>
+                <a href="https://na1.documentssandbox.adobe.com/account/homeJS" target="_blank"
+                    class="btn btn-secondary btn-lg">Acrobat Sign Sandbox (Test)</a>
                 <li>Frequent users should save these links to their browser bookmarks</li>
             </div>
         </div>
     </div>
-    <div class="row px-3 mb4">
-        <div class="col-6">
-            <div class="card border-info">
-                <div class="card-header">
-                    New Business Intake Request
-                </div>
+    <div class="col">
+        <div class="card-group">
+            <div class="card border-dark text-center">
+                <div class="card-header"><img src="{{ url_for('static', filename='img/file.svg') }}" alt="file image"
+                        style="width:75px;height:75px;"></div>
                 <div class="card-body">
-                    <h5 class="card-title">Need eSignature For Your Business?</h5>
-                    <p class="card-text">If your business does not have a group setup in Adobe Acrobat Sign and you are
-                        interested in creating one please create an intake request in ServiceNow. You will need to
-                        follow the below steps:</p>
-                    <ol>
-                        <li>Select "NewBusiness/Need" from "Select an eSignature Reqest Type".</li>
-                        <li>Fill out remaining questions specific to your businesses eSignature needs.</li>
-                        <li>Click Submit.</li>
-                    </ol>
-                    <a target="_blank"
-                        href="https://optum.service-now.com/euts_intake?id=euts_sc_cat_item_form&sys_id=bba6b983db0abf4098e940ceaa961975&sysparm_category=f83bba03db83ff40a937ee82ca961905"
-                        class="btn btn-primary">Create Request</a>
+                    <h5 class="card-title">Beginner's Guide</h5>
+                    <p class="card-text">Get Started Using Adobe Acrobat Sign.</p>
+                    <a target="_blank" href="https://helpx.adobe.com/sign/using/get-started-guide.html"
+                        class="btn btn-primary">Review Guide</a>
                 </div>
             </div>
-        </div>
-        <div class="col offset-sm-1">
-            <div class="card-group">
-                <div class="card border-dark text-center">
-                    <div class="card-header"><img src="{{ url_for('static', filename='img/file.svg') }}"
-                            alt="file image" style="width:75px;height:75px;"></div>
-                    <div class="card-body">
-                        <h5 class="card-title">Beginner's Guide</h5>
-                        <p class="card-text">Get Started Using Adobe Acrobat Sign.</p>
-                        <a target="_blank" href="https://helpx.adobe.com/sign/using/get-started-guide.html"
-                            class="btn btn-primary">Review Guide</a>
-                    </div>
-                </div>
-                <div class="card border-dark text-center">
-                    <div class="card-header"><img src="{{ url_for('static', filename='img/grad-cap.svg') }}"
-                            alt="graduation cap image" style="width:75px;height:75px;"></div>
-                    <div class="card-body">
-                        <h5 class="card-title">Tutorials</h5>
-                        <p class="card-text">Find tutorials from novice to expert to help you expand your skills.</p>
-                        <a target="_blank" href="https://helpx.adobe.com/sign/tutorials.html"
-                            class="btn btn-primary">Watch Tutorials</a>
-                    </div>
+            <div class="card border-dark text-center">
+                <div class="card-header"><img src="{{ url_for('static', filename='img/grad-cap.svg') }}"
+                        alt="graduation cap image" style="width:75px;height:75px;"></div>
+                <div class="card-body">
+                    <h5 class="card-title">Tutorials</h5>
+                    <p class="card-text">Find tutorials from novice to expert to help you expand your skills.</p>
+                    <a target="_blank" href="https://helpx.adobe.com/sign/tutorials.html" class="btn btn-primary">Watch
+                        Tutorials</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
