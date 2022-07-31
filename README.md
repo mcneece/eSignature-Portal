@@ -57,9 +57,6 @@
 <h3>Step 3: Run Commands in Termainal to Run Flask Project</h3>
 
 ```console
-    cd app
-```
-```console
     source env/bin/activate
 ```
 ```console
