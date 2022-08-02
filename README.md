@@ -56,7 +56,7 @@
 <h3>Step 2: Download requirements.txt</h3>
 
 ```console
-    pip install -r /path/to/requirements.txt
+    pip install -r requirements.txt
 ```
 <h3>Step 3: Run Commands in Termainal to Run Flask Project</h3>
 
