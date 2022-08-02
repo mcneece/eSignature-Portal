@@ -2,7 +2,7 @@
 
 # Optum eSignature Support Portal
 
-<p>The eSignature Support Portal was built by Jacob McNeece to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for common service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that the can be self sufficient when utilizing eSignature for their business(es).</p>
+<p>The eSignature Support Portal was built by Jacob McNeece to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for common service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that they can be self sufficient when utilizing eSignature for their business(es).</p>
 
 ### API Calls Simplified
 
@@ -10,13 +10,13 @@
 <ul>This includes:
     <li>Automatting the flow of information for requesting access to Adobe Acrobat Sign using a handful of API calls.</li>
     <li>Supplying end users with the ability to find a Group Admins by entering a {group name} or {email of a colleague} whom has Acrobat Sign access.</li>
-    <li>Gives end users the ability to cancel agreements sent out for signature in bulk.</li>
-    <li>Supplies end users with information regarding who is the owner of a specific webform in Adobe Sign</li>
+    <li>Gives end users the ability to cancel agreements sent out for signature in bulk. {coming soon]</li>
+    <li>Supplies end users with information regarding who is the owner of a specific webform in Adobe Sign {coming soon}</li>
 </ul>
 
 ### One Stop Shop For Everything Acrobat Sign
 
-<p>In addition to simplifying functionality for the common user, the eSignature Support Portal also is the hub for: curreated training material for novice to expert Acrobat Sign users, the fastest routes to submitting service requests to the eSignature Opperations Team, and links to the Adobe Sign tool for beginner users.</p>
+<p>In addition to simplifying functionality for the common user, the eSignature Support Portal also is the hub for: curreated training material userful for novice to expert Acrobat Sign users, the fastest routes to submitting service requests or incidents to the eSignature Opperations Team, and links to the Adobe Sign tool.</p>
 
 <img src="Docs/readme_imgs/home_page.png" align="center" />
     

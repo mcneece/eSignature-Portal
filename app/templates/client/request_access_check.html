@@ -1,18 +1,8 @@
-{% extends "client/templates/public_template.html" %}
+{% extends "client/templates/request_template.html" %}
 <!-- This Jinja syntax extends my html template to this html file  -->
 
-<!-- Site Title -->
-{% block title %}eSign Support - Request Access{% endblock %}
-
-<!-- Top Nav Bar -->
-{% block nav1 %}<a class="nav-link" href="/open-ticket">Open Ticket</a>{% endblock %}
-{% block nav2 %}<a class="nav-link active" aria-current="true" href="/request-access">Request Access</a>{% endblock %}
-{% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
-
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="/">Home</a></li>
-<li class="breadcrumb-item active" aria-current="page">Request Access</li>
-{% endblock %}
+{% block nav01 %}<a class="nav-link" href="/request-access">Step 1: Request Access</a>{% endblock %}
+{% block nav02 %}<a class="nav-link active" aria-current="true">Step 2: Verify Accesss</a>{% endblock %}
 
 {% block main %}
 <!-- Details/Form Card -->
@@ -20,7 +10,7 @@
     <div class="col-sm-6">
         <div class="card border-primary mx-3">
             <div class="card-body" align="left">
-                <h5 class="card-title">Adobe Acrobat Sign Access Check</h5>
+                <h5 class="card-title">Step 2: Verify Acrobat Sign Access</h5>
                 <p class="card-text">
                     Requesting access to Adobe Acrobat Sign is a multi-step process that requires action from the
                     end-user
@@ -31,7 +21,7 @@
                     process.
                 </p>
                 <hr>
-                <form action="/request-access" method="POST">
+                <form action="/request-access-check" method="POST">
                     <div class="form-group">
                         <div>
                             <label class="mb-1">Enter Your Work Email</label>
@@ -50,4 +40,4 @@
         {{ alert|safe }}
     </div>
 </div>
-    {% endblock %}
+{% endblock %}

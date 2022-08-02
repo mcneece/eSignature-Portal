@@ -1,0 +1,18 @@
+{% extends "client/templates/request_template.html" %}
+<!-- This Jinja syntax extends my html template to this html file  -->
+
+{% block nav01 %}<a class="nav-link active" aria-current="true">Step 1: Request Access</a>{% endblock %}
+{% block nav02 %}<a class="nav-link" href="/request-access-check">Step 2: Verify Accesss</a>{% endblock %}
+
+{% block main %}
+<div class="row">
+    <div class="col ms-3">
+        <h5>Step 1: Secure Request</h5>
+        <p>In order to get access to Acrobat Sign on UHG's account you mut submit a secure request. To submit one go to <a
+                target="_blank" href="https://secure.uhc.com">secure.uhc.com</a> and follow the video instructions
+            below:</p>
+        <img class="ms-3" src="{{ url_for('static', filename='img/request_access.mp4') }}" alt="video of request process"
+            width="958" height="432">
+    </div>
+</div>
+{% endblock %}

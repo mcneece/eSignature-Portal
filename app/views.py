@@ -217,7 +217,11 @@ def home():
 # End Home Page____________________________________________________________________________________________________________________________________________________
 
 
-@app.route("/request-access", methods=["GET", "POST"])
+@app.route("/request-access")
+def requestaccess():
+    return render_template("client/request_access.html")
+
+@app.route("/request-access-check", methods=["GET", "POST"])
 def signcheck():
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
     # make a instance (object) of the class and use instance methods from now on
@@ -273,7 +277,7 @@ def signcheck():
                 # Step 4 Failed: User is not in the required security group
                 else:
                     alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Request Process Not Completed</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user <strong>"+userinput + \
-                        "</strong> is not part of the required AD Security Group for Acrobat Sign. This can be requested following the steps below:</p>If your group is already setup for Acrobat Sign submit a <a target=\"_blank\" href=\"https://secure.uhc.com\" class=\"alert-link\">secure</a> request<ol type=\"1\" class=\"mb-1\"><li>Click Add Group Membership..</li><li>Enter dtm_esignature in the Search groups by groupname box.</li><li>Click Search.</li><li>Click dtm_esignature to highlight.</li><li>Click the left arrow to move it to the Selected Groups box.</li><li>Click Next.</li><li>Verify the information.</li><li>Add a Business Justification.</li><li>Click Submit.</li><hr class=\"mb-2\"><h5>After Submission:</h5><p>Wait for your request to be approved (Your secure request needs approval from your manager and the eSignature Support Team).</p><p>Once your reqest is approved the system will automatically create a disabled account in Adobe Acrobat Sign. This automated sync process can take up to three hours.</p><hr class=\"mb-2\"><h5>How to Verify:</h5><p>To verify next steps in the request process, simply submit your email again using this tool. If you get this same alert that means one of the following: Your request was not submitted correctly, your request has not yet been approved or was denied, the automatted sync tool is still running.</p></div></div>"
+                        "</strong> is not part of the required AD Security Group for Acrobat Sign. This can be requested following the steps below:</p>If your group is already setup for Acrobat Sign submit a <a target=\"_blank\" href=\"https://secure.uhc.com\" class=\"alert-link\">secure</a> request <ol type=\"1\" class=\"mb-1\"><li>Click Add Group Membership..</li><li>Enter dtm_esignature in the Search groups by groupname box.</li><li>Click Search.</li><li>Click dtm_esignature to highlight.</li><li>Click the left arrow to move it to the Selected Groups box.</li><li>Click Next.</li><li>Verify the information.</li><li>Add a Business Justification.</li><li>Click Submit.</li><hr class=\"mb-2\"><h5>After Submission:</h5><p>Wait for your request to be approved (Your secure request needs approval from your manager and the eSignature Support Team).</p><p>Once your reqest is approved the system will automatically create a disabled account in Adobe Acrobat Sign. This automated sync process can take up to three hours.</p><hr class=\"mb-2\"><h5>How to Verify:</h5><p>To verify next steps in the request process, simply submit your email again using this tool. If you get this same alert that means one of the following: Your request was not submitted correctly, your request has not yet been approved or was denied, the automatted sync tool is still running.</p></div></div>"
                     # renders HTML template and passed Alert which is HTML that gets appended
                     return render_template("client/request_access_check.html", alert=alert)
         # Step 1 Failed: users domain is not claimed in the UHG console
