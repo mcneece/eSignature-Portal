@@ -76,7 +76,7 @@ class AcrobatData(object):
         "This function takes an email as a parameter and runs a GET user/userEmail API call to Acrobat Sign returning email:'', id:'',isAccountAdmin:''"
 
         # Make API call using Python requests package
-        url = app.config["REQUEST_URL_USERS"]
+        url = app.config["REQUEST_URL_USERS"]+"/userByEmail"
 
         payload = {}
         headers = {
@@ -105,7 +105,7 @@ class AcrobatData(object):
         "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
 
         # Make API call using Python requests package
-        url = app.config["REQUEST_URL_GROUPS"]
+        url = app.config["REQUEST_URL_USERS"]+"/"+userID+"/groups"
 
         payload = {}
         headers = {
@@ -128,7 +128,7 @@ class AcrobatData(object):
         groupinfo = jsondata["groupInfoList"]
         returnedinfo = []
         for i in groupinfo:  # For each group the user is apart of grab the name and groupid
-            nameandid = (i["groupName"], i["groupId"])
+            nameandid = (i["name"], i["id"])
             returnedinfo.append(nameandid)
         return returnedinfo
 
@@ -156,6 +156,9 @@ class AcrobatData(object):
         # Creates a dictionary for grabing admins:
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
+        
+        print(jsondata)
+
         for i in jsondata["userInfoList"]:
             if i["isGroupAdmin"] == True:
                 listofadmins[groupName].append(i)
