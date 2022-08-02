@@ -29,8 +29,10 @@
     class Config(object):
         DEBUG = False
         TESTING = False
+        # To make this more secure i could use the Secrets Python module or OS.random
         SECRET_KEY = # Insert PRODUCTION Access Token w: USER READ prviliges
-        REQUEST_URL = # Insert Request URL for PRODUCTION Adobe Sign API
+        REQUEST_URL_USERS = # Insert Request URL for PRODUCITON Adobe Sign API
+        REQUEST_URL_GROUPS = # Insert Request URL for PRODUCTION Adobe Sign API
         SESSION_COOKIE_SECURE = True
 
     class ProductionConfig(Config):
@@ -39,13 +41,15 @@
     class DevelopmentConfig(Config):
         DEBUG = True
         SECRET_KEY = # Insert SANDBOX Access Token w: USER READ prviliges
-        REQUEST_URL = # Insert Request URL for SANDBOX Adobe Sign API
+        REQUEST_URL_USERS = # Insert Request URL for SANDBOX Adobe Sign API
+        REQUEST_URL_GROUPS = # Insert Request URL for SANDBOX Adobe Sign API 
         SESSION_COOKIE_SECURE = False
 
     class TestingConfig(Config):
         TESTING = True
         SECRET_KEY = # Insert SANDBOX Access Token w: USER READ prviliges
-        REQUEST_URL = # Insert Request URL for SANDBOX Adobe Sign API
+        REQUEST_URL_USERS = # Insert Request URL for SANDBOX Adobe Sign API
+        REQUEST_URL_GROUPS = # Insert Request URL for SANDBOX Adobe Sign API
         SESSION_COOKIE_SECURE = False
 ```
     
