@@ -80,3 +80,31 @@
 
 ## Using the Tool
 
+1. [ Home Page. ](#home)
+2. [ Open Ticket. ](#ticket)
+3. [ Request Access. ](#request)
+4. [ Group Admin Check. ](#admin)
+5. [ Cancel Agreements. ](#cancel)
+
+<a name="home"></a>
+## 1. Home Page
+
+sometext
+
+<a name="ticket"></a>
+## 2. Open a Ticket
+
+sometext
+
+<a name="request"></a>
+## 3. Request Access
+    
+sometext
+    
+<a name="admin"></a>
+## 4. Group Admin Check
+    
+sometext
+    
+<a name="cancel"></a>
+## 5. Cancel Agreements
