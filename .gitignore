@@ -3,7 +3,7 @@ config.py
 
 # Common code
 __pycache__/
-app/__pycache__
+app/__pycache__/
 .DS_Store
 app/.DS_Store
 app/static/.DS_Store
