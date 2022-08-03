@@ -89,7 +89,17 @@
 <a name="home"></a>
 ## 1. Home Page
 
-sometext
+Overview:
+    The Home page of the eSignature Support Portal site hosts training material and a high level overview of Acrobat Sign, while also being the source of truth for links to UHG's instance of Acrobat Sign (na1 and na3 shards). 
+    
+    Training Material:
+    The training material is a link to Adobe's Helpx articles and videos. The helpx training is something that is maintained by Adobe and is open to the public. The videos which can be accessed by clicking 'watch videos' on the eSign Support Portal and are easily consumible since they are 2-4 minutes in length. These videos can be anything from setting up agreement routing to creating a workflow. While the beginners guide is a HTML file also hosted and maintained by Adobe that helps a new user setup and start using Adobe Acrobat Sign for the first time. It focuses on setting up your signature and updating your user profile.
+    
+    High Level Overview of Acrobat Sign:
+    This is just a simple paragraph that introduces the user to Acrobat Sign and eSignature. It lets the user understand that this product is for capturing eSignatures which can help reduce postage costs, paper footprints, and automate routing, and expedite the signature process
+    
+    UHG's Acrobat Sign Links:
+    This is a HTML button that host the most updated links to our Adobe Sign product. Currently we have an intranet page that the support team cannot access that hosts outdated links that have since been changed due to a DNS migration. With hosting links on a tool developed by the (me) a member of the operations team it can easily be changed during a future DNS migration so that end users are accessing the proper links. This is done by simply changing the 'href=#' link on the button.
 
 <a name="ticket"></a>
 ## 2. Open a Ticket
