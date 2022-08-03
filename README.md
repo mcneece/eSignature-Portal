@@ -104,7 +104,17 @@ Overview:
 <a name="ticket"></a>
 ## 2. Open a Ticket
 
-sometext
+Overview:
+    When users cannot solve an issue themselves they need access to our support team. In order to track issues and create a formal process with SLA's we utilize service now for incidents or something needs to be fixed with the tool, a request to add a new business to our Acrobat Sign instance, and creating an enhancement request to Adobe for a golabl change to their product that allows it to work for others better.
+    
+    Incident Ticket:
+    An incident ticket at UHG is first vetted by the Help Desk. In order to reduce the volume of requests going to our Optum eSignature support team the help desk will first try and solve the issue. In order to open a ticket with the help desk one must call or create a ticket with a chat bot. The link in the eSignature Support Portal pushes users to the chat bot page on their browser and allows them to submit a ticket to the help desk. If the ticket is not able to be fixed by the help desk it will get forwarded to the eSignature Support Team.
+    
+    Net New Request:
+    The net new request is for groups (businesses) that are part of UHG that are looking to utilize Acrobat Sign to excelerate their business processes. Acrobat Sign is the preferred solution for UHG and is part of their desktop services charges and is no charge to the business. They can simply click the button on the eSiganture Support Portal 'Submit a request' fill out the form and it will get routed directly to the eSignature Support Team who will setup a meeting within 24 hours to kickoff the onboarding process for this new business group.
+    
+    Enhancement Request:
+    This feature is currently unavailble and that is why the button is disabled. When this form is stood up by the ServiceNow and eSig support team it will be a customer facing form that allows them to submit enhancement requests to be reviewed and passed on to Adobe if they are legitimate.
 
 <a name="request"></a>
 ## 3. Request Access
