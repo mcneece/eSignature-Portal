@@ -17,8 +17,6 @@
 ### One Stop Shop For Everything Acrobat Sign
 
 <p>In addition to simplifying functionality for the common user, the eSignature Support Portal also is the hub for: curreated training material for novice to expert Acrobat Sign users, the fastest routes to submitting service or incident requests to the eSignature Opperations Team, and links to the Adobe Sign tool.</p>
-
-<img src="Docs/readme_imgs/home_page.png" align="center" />
     
 ## Installation
         
