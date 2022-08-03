@@ -92,6 +92,8 @@
 #### Overview:
 The Home page of the eSignature Support Portal hosts training material and a high level overview of Acrobat Sign, while also being the source of truth for links to UHG's instance of Acrobat Sign (na1 and na3 shards). 
     
+<img src="Docs/readme_imgs/home_screen.png">
+
 #### Training Material:
 The training material is Adobe's Helpx articles and videos currated by their support team. The helpx training videos and articles are maintained by Adobe and open to the public. The training videos which can be accessed by clicking 'watch videos' on the eSignature Support Portal are easily consumible since they are 2-4 minutes in length. These videos can be anything from setting up agreement routing to creating a workflow. While the beginners guide is a HTML file that helps a new user setup and start using Adobe Acrobat Sign for the first time, it focuses on setting up your signature and updating your user profile and other beginning processes to setup a user for success with the tool.
     
@@ -106,6 +108,8 @@ The Acrobat Sign links are simply just HTML buttons that host the most update to
 
 #### Overview:
 When users cannot solve an issue themselves and need assistance from UHG's opperational support team it can sometimes be a headache. This is because they are not informed about the formal process for engaging UHG's support team. In order to track issues and automate SLA's UHG utilizes ServiceNow for incidents and service request to their opperations team. This includes requesting something be fixed, a request to add a new business to UHG's instance of Acrobat Sign, and creating an enhancement request for a global change to Adobe's Acrobat Sign product.
+
+<img src="Docs/readme_imgs/ticket_screen.png">
     
 #### Incident Ticket:
 The eSignature Support Portal has a button for the best link for raising an incident with Acrobat Sign. This will route the ticket to UHG's help desk who take the first crack at solving the incident to reduce the volume of requests going to UHG's eSignature support team. The link in the eSignature Support Portal pushes users to the chat bot webpage in their browser to submit a ticket. This will save the user a lot of time because the alternative is calling the help desk which can be time wasted on the phone. If the ticket is not able to be fixed by the help desk it will get forwarded to the eSignature Support Team and they will have a 24 hour SLA to reach out to the customer to resolve the issue.
@@ -121,12 +125,16 @@ This feature is currently unavailble and is why the button is disabled on the us
     
 #### Overview:
 Request access is broken down in two steps on the eSignature Portal. Step 1: The request process, this includes a video that is hosted on the eSignature Support Portal that shows the end user how to complete a Secure request process. This is something users struggle with so the video eliminates any confusion on how to complete the request. Step 2: Is the meat and potatoes of the eSiganture Portal, which request access check. This tool takes a user inputted email that gets processed by a combination of python functions data retrieved by API calls to verify or notify the user where they are in the request process. If they have competed the request process it will let them know all is good to go, or if they have not it will give them feedback of steps that need to be taken to finish their request. This process currently very cumbersome and many users struggle with understanding if they have indeed taken the correct actions to get access (due to lack of feedback during the request process). Additionally when users come with questions regarding if they have access it is a very manual process for the eSiganture support team to look up where they are in the request process. It requeires the eSignature support team to check several sources of information (Acrobat Sign, the Adobe Console, and a few internal tools) to give corrective action for their specific request. Currenlty UHG has eighteen thousand users and growing so this is one of the most popular issues.
-    
+
 #### Request Access:
 When requesting Acrobat Sign a user must be added to a security group in Active Directory. For UHG this can be accomplished by submitting a group request in Secure (secure.uhc.com). This process requires the user to input the platform, operating system, ID type, pick their ID, find the security group, state the length they wish to have access for, and state the reasoning for the request. All of that information is not always known by the employee making the request, especially new hires. To simplfy the process I screen recorded myself making the same Secure request so users can follow along when requesting access. In the past we had used written instructions which worked for most part but was still difficult for some to follow. 
     
+<img src="Docs/readme_imgs/request_screen.png">
+
 #### Verify Request:
 The original goal of this tool was to verify where a user is in the request process, but has since grown to include additional functionality. The verify request tool goes through several checks using python functions to see where the user is in the request process. It takes a users email and first verifies that the email entered a valid email (valid username and domain). During the valid email check the function also runs the domain against a list of claimed domains in the UHG console (using a CSV file) to ensure the domain is claimed. If the domain is not claimed the user cannot get access to Acrobat Sign (no exceptions), otherwise the tool continues on. After that check passes, an API call is made to Adobe to verify if the email entered exist in Acrobat Sign. If it does, it will check the group the user is in using another API call. By default users orginally previsioned in Acrobat Sign are assigend to the 'default group', if the user is in the default group then the UI flashes the user an alert, and suggests that they use another tool in the portal to find an admin (find admin tool) to get them assigned to a group. If the user is not in the default group that means they have access and the UI flashes an alert notifying them that they have the required access necessary, and to go ahead and login. If the email is not found by the API but passed the email validation then the tool checks if they are part of the required security group that must be request via Secure. If they are part of the security group then a rare error has occurred (user not in Acobat but is part of security group), the UI then flashes and alert to open an incident ticket with our support team. If they are not part of the security group then the UI flashes instructions to submit the required Secure request.
+
+<img src="Docs/readme_imgs/request-verify_screen.png">
     
 <a name="admin"></a>
 ## 4. Group Admin Check
@@ -139,10 +147,14 @@ The group admin check is a tool used to find a businesses group admin. There are
 
 The search by group takes a group name and runs it through a script to find all the admins of that group. It starts by comparing the group name entered against a list of all groups retrieved by an Adobe rest API call (GET /groups). If there is a match it will take that group ID and run it against another API call (GET /groups/{groupID}/Users) which returns all the users from that group along with other details about each users. If there is not a match it notifies the user to try another group name or search by email. One of the details pulled by the previous API call is a boolean value for is a group admin (if the group name matches). If the boolean is true then it will save that user's email to a dicitonariy and flash an Alert on the UI notifying the user all admins in that group (you can have more than one group admin).
 
+<img src="Docs/readme_imgs/find-admin_screen.png">
+
 #### Searching by Email:
     
 The search by email takes a user input (an email representing a colleague who they wish to mimic their access) and runs it against a python function that checks if the username and domain are valid as well as if the domain is claimed in UHG's acrobat sign console. If the validation fails the user is alerted and they should try again. If not the email is ran against an API call (get /users/{email}/usersByEmail) to see if that email matches an existing user. If not the user is alerted and asked to try another email or search by group name. If there is a match then the user ID is pulled and ran against another API call to see if they're part of an existing group. If they are not (then they are part of default group) the user is notified that the email is an active user but don't have the necessary group access requeired. On the other hand if they are part of a group, that group ID is pulled and used in another API call. That API call is the GET users/{group id}/groups, this finds all the users in that group and pulls supporting data about them including a boolean for is a group admin. All users that have that bolean = True are added to a dictionary with their email. Because users can be part of multiple groups multiple group IDs are captured in a tuple during the GET users/{group id}/groups call and the dictionary grows for each group and each admin of that group before it is pushed to the UI to alert the users of all the admins to contact for all groups that are associated to the inputed email.
     
+<img src="Docs/readme_imgs/find-admin-email_screen.png">
+
 <a name="cancel"></a>
 ## 5. Cancel Agreements
 
