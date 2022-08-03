@@ -131,8 +131,20 @@ The original goal of this tool was the verify request process but has since grow
     
 <a name="admin"></a>
 ## 4. Group Admin Check
+
+#### Overview:
     
-sometext
+The group admin check is a tool used to find a your businesses group admin. There are 350+ businesses that utilize UHG's Acrobat Sign account. Because of the volume of users and groups it isn't feasible for the support team to manage these groups, becuase of that group management is self service. Each group when onboarded to Acrobat Sign is assigned a group admin, these individuals manage the users being added to their group, settings, and are the point of contact for all things Acrobat Sign for their business. Because users are assigned to the default group when they first become provisioned to Acrobat Sign they must contact their group admin to get access to a group that allows them to utilize Acrobat Sign. Typically users don't know who that is but may know the group name or an email of a colleague who has the access they require. What the group admin tool does is runs several lines of code to match that group name or colleague email to information retrieved from API calls to Adobe to find their group admin. 
+    
+#### Searching by Group:
+
+The search by group takes a group name and runs it against a list of all groups retrieved by an Acrobat Sign rest API call (GET /groups) if there is a match it will take that group ID and run it against another API call (GET /groups/{groupID}/Users) which returns all the users from that group along with other details about each users. One of those details are a boolean for is a group admin. If the boolean is true then it will save that user's email to a dicitonariy and flash an Alert on the UI notifying the user all admins in that group (you can have more than one group admin). If no match is found then it asks the user to enter another group name or try an email instead.
+    
+#### Searching by Email:
+    
+The search by email takes a user inputed email representing a colleague who they wish to mimic their access. The email is ran against a python function that checks if the username and domain are valid as well as if the domain is claimed in UHG's acrobat sign console. If the validation fails the user is alerted and they should try again. If not the email is ran against an API call (get /users/{email"/usersByEmail) to see if that email matches an existing user. If not the user is alerted an asked to try another email or searching by group, if there is a match then the user ID is pulled an ran against another API call to see if they're part of an existing group. If they are not (part of default group) then the user is notified that they are a user but don't have access, if they are part of a group that group ID is pulled and used in another API call. That API call is the (GET users/{group id}/groups) this finds all the users in that group and pulls supporting data about them including a boolean for is a group admin. All users that boolean is group admin = true are added to a dictionary with their email. Because users can be part of multiple groups multiple group IDs are captured in a tuple during the GET users/{group id}/groups call and the dictionary grows for each group and each admin of that group before it is pushed to the UI to alert the users of all the admins to contact.
     
 <a name="cancel"></a>
 ## 5. Cancel Agreements
+
+This functionality is coming soon but not live on the eSignature Portal. This will allow users to cancel agreements in bulk with an agreement ID. In concept it will loop and run multiple API calls for each ID and cancel them.
