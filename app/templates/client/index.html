@@ -10,56 +10,87 @@
 {% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
 
 {% block main %}
+
 <div class="container-fluid">
-    <div class="row mb-4">
-        <h1><img src="{{ url_for('static', filename='img/adobe-logo.jpeg') }}" class="rounded" alt="Acrobat Sign Logo"
-                style="width:50px;height:50px;"> Adobe Acrobat Sign</h1>
-    </div>
-    <div class="row px-3 mb-4">
-        <div class="col-6">
-            <p>eSignature is a method of collecting a signature(s) on a document through electronic means, rather than
+    <div class="row ms-5">
+        <div class="col">
+            <h1 class="my-5"><img src="{{ url_for('static', filename='img/adobe-logo.jpeg') }}" class="rounded"
+                    alt="Acrobat Sign Logo" style="width:50px;height:50px;"> Adobe Acrobat Sign</h1>
+
+            <img class="my-8" src="{{ url_for('static', filename='img/home_text.png') }}"
+                alt="Collect Signatures on Documents Today">
+
+            <p class="my-5" style="color:rgb(149, 156, 249)">eSignature is a method of collecting a signature(s) on a
+                document through electronic means, rather than
                 physically sending & signing paper.
                 To electronically sign a document, a signer navigates to a secure website and completes a series of
                 acknowledgements meant to verify their identity and intent to sign the document(s).
             </p>
-            <p class="mt-1">This service is available for the entire organization, please visit <a
-                    href="request-access">the request access page</a> to find out more!</p>
-        </div>
-        <div class="col offset-sm-1">
-            <h4>Links to Adobe Acrobat Sign</h4>
-            <div class="mx-3">
-                <a href="https://unitedhg.na3.adobesign.com/account/homeJS" target="_blank"
-                    class="btn btn-primary btn-lg">Acrobat Sign Production</a>
-                <a href="https://na1.documentssandbox.adobe.com/account/homeJS" target="_blank"
-                    class="btn btn-secondary btn-lg">Acrobat Sign Sandbox (Test)</a>
-                <li>Frequent users should save these links to their browser bookmarks</li>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 offset-md-3">
-        <div class="card-group">
-            <div class="card border-dark text-center">
-                <div class="card-header"><img src="{{ url_for('static', filename='img/file.svg') }}" alt="file image"
-                        style="width:75px;height:75px;"></div>
-                <div class="card-body">
-                    <h5 class="card-title">Beginner's Guide</h5>
-                    <p class="card-text">Get Started Using Adobe Acrobat Sign.</p>
-                    <a target="_blank" href="https://helpx.adobe.com/sign/using/get-started-guide.html"
-                        class="btn btn-primary">Review Guide</a>
+            <div align="center">
+                <!-- Button trigger Acrobat Links modal -->
+                <button type="button" class="btn btn-outline-primary btn-lg mt-3 mx-3" data-bs-toggle="modal"
+                    data-bs-target="#esignLinksModal">
+                    Adobe Acrobat Sign
+                </button>
+
+                <!-- Acrobat Links Modal -->
+                <div class="modal fade" id="esignLinksModal" tabindex="-1" aria-labelledby="esignLinksModal"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Acrobat Sign Links</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" align="left">
+                                The links below will take you to Adobe's cloud based eSignature tool!
+                            </div>
+                            <div class="modal-footer">
+                                <a class="btn btn-primary" target="_blank"
+                                    href="https://unitedhg.na3.adobesign.com/account/homeJS">Production - Acrobat
+                                    Sign</a>
+                                <a class="btn btn-secondary" target="_blank"
+                                    href="https://na1.documentssandbox.adobe.com/account/homeJS">Sandbox - Acrobat
+                                    Sign</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Button trigger Acrobat Training modal -->
+                <button type="button" class="btn btn-outline-warning btn-lg mt-3 mx-3" data-bs-toggle="modal"
+                    data-bs-target="#trainingModal">
+                    Training Material
+                </button>
+
+                <!-- Acrobat Training Modal -->
+                <div class="modal fade" id="trainingModal" tabindex="-1" aria-labelledby="trainingModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Acrobat Sign Training Material</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" align="left">
+                                <h5>Beginners Guide</h5>
+                                <p>Get Started Using Adobe Acrobat Sign.</p>
+                                <a class="btn btn-primary mb-5" target="_blank"
+                                    href="https://helpx.adobe.com/sign/using/get-started-guide.html">Beginners Guide</a>
+                                <h5>Tutorials</h5>
+                                <p>Find tutorials from novice to expert to help you expand your skills.</p>
+                                <a class="btn btn-primary" target="_blank"
+                                    href="https://helpx.adobe.com/sign/tutorials.html">Tutorials</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card border-dark text-center">
-                <div class="card-header"><img src="{{ url_for('static', filename='img/grad-cap.svg') }}"
-                        alt="graduation cap image" style="width:75px;height:75px;"></div>
-                <div class="card-body">
-                    <h5 class="card-title">Tutorials</h5>
-                    <p class="card-text">Find tutorials from novice to expert to help you expand your skills.</p>
-                    <a target="_blank" href="https://helpx.adobe.com/sign/tutorials.html" class="btn btn-primary">Watch
-                        Tutorials</a>
-                </div>
-            </div>
+        </div>
+        <div class="col">
+            <img src="{{ url_for('static', filename='img/esign.svg') }}" alt="eSignature Visual">
         </div>
     </div>
-</div>
 </div>
 {% endblock %}

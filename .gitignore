@@ -1,4 +1,17 @@
+# Project Configuratrions
 config.py
-__pycache__
+
+# Common code
+__pycache__/
+app/__pycache__
 .DS_Store
-env
+app/.DS_Store
+app/static/.DS_Store
+app/static/img/.DS_Store
+
+#Virtual Environment
+env/
+venv/
+.env
+.venv
+ENV/
