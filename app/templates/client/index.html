@@ -14,17 +14,18 @@
 <div class="container-fluid">
     <div class="row ms-5">
         <div class="col">
-            <h1 class="my-5"><img src="{{ url_for('static', filename='img/adobe-logo.jpeg') }}" class="rounded"
-                    alt="Acrobat Sign Logo" style="width:50px;height:50px;"> Adobe Acrobat Sign</h1>
+            <h1 class="my-5"><img src="{{ url_for('static', filename='img/adobe_fill_sign_logo.png') }}"
+                    alt="Acrobat Sign Logo" style="width:50px;height:50px; display: inline"> Adobe Acrobat Sign</h1>
 
             <img class="my-8" src="{{ url_for('static', filename='img/home_text.png') }}"
                 alt="Collect Signatures on Documents Today">
 
-            <p class="my-5" style="color:rgb(149, 156, 249)"><strong>eSignature is a method of collecting a signature(s) on a
-                document through electronic means, rather than
-                physically sending & signing paper.
-                To electronically sign a document, a signer navigates to a secure website and completes a series of
-                acknowledgements meant to verify their identity and intent to sign the document(s).</strong> 
+            <p class="my-5" style="color:rgb(180, 139, 255)" align="center"><strong>eSignature is a method of collecting
+                    a signature(s) on a
+                    document through electronic means, rather than
+                    physically sending & signing paper.
+                    To electronically sign a document, a signer navigates to a secure website and completes a series of
+                    acknowledgements meant to verify their identity and intent to sign the document(s).</strong>
             </p>
             <div align="center">
                 <!-- Button trigger Acrobat Links modal -->
@@ -36,23 +37,25 @@
                 <!-- Acrobat Links Modal -->
                 <div class="modal fade" id="esignLinksModal" tabindex="-1" aria-labelledby="esignLinksModal"
                     aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="exampleModalLabel">Acrobat Sign Links</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body" align="left">
-                                The links below will take you to Adobe's cloud based eSignature tool!
-                            </div>
-                            <div class="modal-footer">
-                                <a class="btn btn-primary" target="_blank"
-                                    href="https://unitedhg.na3.adobesign.com/account/homeJS">Production - Acrobat
-                                    Sign</a>
-                                <a class="btn btn-secondary" target="_blank"
-                                    href="https://na1.documentssandbox.adobe.com/account/homeJS">Sandbox - Acrobat
-                                    Sign</a>
+                            <div class="modal-body my-4">
+                                <a class="btn btn-outline-secondary mb-4 w-75" target="_blank"
+                                    href="https://unitedhg.na3.adobesign.com/account/homeJS"><img
+                                        src="{{ url_for('static', filename='img/Adobe_PROD_logo.svg') }}" class="me-3"
+                                        alt="Acrobat Sign PROD Logo" style="width:50px;height:50px;"><strong>Acrobat
+                                        Sign Production</strong></a>
+
+                                <a class="btn btn-outline-secondary w-75" target="_blank"
+                                    href="https://na1.documentssandbox.adobe.com/account/homeJS"><img
+                                        src="{{ url_for('static', filename='img/Adobe_sandbox_logo.svg') }}"
+                                        class="me-3" alt="Acrobat Sign Sandbox Logo"
+                                        style="width:50px;height:50px;"><strong>Acrobat Sign Sandbox</strong></a>
                             </div>
                         </div>
                     </div>
@@ -66,7 +69,7 @@
                 <!-- Acrobat Training Modal -->
                 <div class="modal fade" id="trainingModal" tabindex="-1" aria-labelledby="trainingModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="exampleModalLabel">Acrobat Sign Training Material</h5>
@@ -74,14 +77,37 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body" align="left">
-                                <h5>Beginners Guide</h5>
-                                <p>Get Started Using Adobe Acrobat Sign.</p>
-                                <a class="btn btn-primary mb-5" target="_blank"
-                                    href="https://helpx.adobe.com/sign/using/get-started-guide.html">Beginners Guide</a>
-                                <h5>Tutorials</h5>
-                                <p>Find tutorials from novice to expert to help you expand your skills.</p>
-                                <a class="btn btn-primary" target="_blank"
-                                    href="https://helpx.adobe.com/sign/tutorials.html">Tutorials</a>
+                                <a target="_blank" href="https://helpx.adobe.com/sign/using/get-started-guide.html"
+                                    style="text-decoration: none; color: inherit;">
+                                    <div class="card text-center w-75 mb-3">
+                                        <div class="card-header" style = "background-color: rgba(219,223,254)">
+                                            <img src="{{ url_for('static', filename='img/file.svg') }}"
+                                                style="width:50px;height:50px;" alt="Beginners Guide Logo">
+                                        </div>
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-2">Beginners Guide</h4>
+                                            <p class="card-text mb-3">
+                                                <srrong>Get Started Using Adobe Acrobat Sign</srrong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a target="_blank" href="https://helpx.adobe.com/sign/tutorials.html"
+                                    style="text-decoration: none; color: inherit;">
+                                    <div class="card text-center w-75">
+                                        <div class="card-header" style = "background-color: rgba(219,223,254)">
+                                            <img src="{{ url_for('static', filename='img/grad-cap.svg') }}"
+                                                style="width:50px;height:50px;" alt="Beginners Guide Logo">
+                                        </div>
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-2">Tutorials</h4>
+                                            <p class="card-text mb-3">
+                                                <srrong>Find Tutorials From Novice to Expert to Help You Expand Your
+                                                    Skills</srrong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </div>
