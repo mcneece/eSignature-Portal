@@ -16,17 +16,18 @@
         <div class="col">
             <div class="mb-5 mt-3">
                 <img class="me-2" src="{{ url_for('static', filename='img/adobe_fill_sign_logo.png') }}"
-                        alt="Acrobat Sign Logo" style="width:50px;height:50px;"> 
+                    alt="Acrobat Sign Logo" style="width:50px;height:50px;">
                 <span style="vertical-align: middle; font-size: 250%; font-weight: bold;">Adobe Acrobat Sign</span>
             </div>
             <div align="center">
-                <img class="my-8" src="{{ url_for('static', filename='img/home_text.png') }}"
+                <img class="my-8" src="{{ url_for('static', filename='img/home_text.svg') }}"
                     alt="Collect Signatures on Documents Today">
                 <p class="my-5" style="color:rgb(180, 139, 255)"><strong>eSignature is a method of collecting
                         a signature(s) on a
                         document through electronic means, rather than
                         physically sending & signing paper.
-                        To electronically sign a document, a signer navigates to a secure website and completes a series of
+                        To electronically sign a document, a signer navigates to a secure website and completes a series
+                        of
                         acknowledgements meant to verify their identity and intent to sign the document(s).</strong>
                 </p>
             </div>
@@ -36,7 +37,6 @@
                     data-bs-target="#esignLinksModal">
                     Adobe Acrobat Sign
                 </button>
-
                 <!-- Acrobat Links Modal -->
                 <div class="modal fade" id="esignLinksModal" tabindex="-1" aria-labelledby="esignLinksModal"
                     aria-hidden="true">
@@ -47,18 +47,42 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body my-4">
-                                <a class="btn btn-outline-secondary mb-4 w-75" target="_blank"
-                                    href="https://unitedhg.na3.adobesign.com/account/homeJS"><img
-                                        src="{{ url_for('static', filename='img/Adobe_PROD_logo.svg') }}" class="me-3"
-                                        alt="Acrobat Sign PROD Logo" style="width:50px;height:50px;"><strong>Acrobat
-                                        Sign Production</strong></a>
-
-                                <a class="btn btn-outline-secondary w-75" target="_blank"
-                                    href="https://na1.documentssandbox.adobe.com/account/homeJS"><img
-                                        src="{{ url_for('static', filename='img/Adobe_sandbox_logo.svg') }}"
-                                        class="me-3" alt="Acrobat Sign Sandbox Logo"
-                                        style="width:50px;height:50px;"><strong>Acrobat Sign Sandbox</strong></a>
+                            <div class="modal-body">
+                                <a target="_blank" href="https://unitedhg.na3.adobesign.com/account/homeJS"
+                                    style="text-decoration: none; color: inherit;">
+                                    <div class="card border-primary text-center mb-3">
+                                        <div class="card-header overflow-hidden p-0" style="background-color: rgba(219,223,254)">
+                                            <img class="w-75"
+                                                src="{{ url_for('static', filename='img/production_tile.svg') }}"
+                                                alt="Acrobat Sign Production Link">
+                                        </div>
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-2">Acrobat Sign Production</h4>
+                                            <p class="card-text my-auto">
+                                                <srrong>Start using Adobe Acrobat Sign at work!
+                                                </srrong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a target="_blank" href="https://na1.documentssandbox.adobe.com/account/homeJS"
+                                    style="text-decoration: none; color: inherit;">
+                                    <div class="card border-primary text-center mb-3">
+                                        <div class="card-header overflow-hidden p-0" style="background-color: rgba(219,223,254)">
+                                            <img class="w-75"
+                                                src="{{ url_for('static', filename='img/sandbox_tile.svg') }}"
+                                                alt="Acrobat Sign Sandbox Link">
+                                        </div>
+                                        <div class="card-body">
+                                            <h4 class="card-title mb-2">Acrobat Sign Sandbox</h4>
+                                            <p class="card-text my-auto">
+                                                <srrong>Test Adobe Acrobat Sign workflows and functionality in a
+                                                    non-produciton environment!
+                                                </srrong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -83,9 +107,9 @@
                                 <a target="_blank" href="https://helpx.adobe.com/sign/using/get-started-guide.html"
                                     style="text-decoration: none; color: inherit;">
                                     <div class="card text-center w-75 mb-3">
-                                        <div class="card-header" style = "background-color: rgba(219,223,254)">
-                                            <img src="{{ url_for('static', filename='img/file.svg') }}"
-                                                style="width:50px;height:50px;" alt="Beginners Guide Logo">
+                                        <div class="card-header" style="background-color: rgba(219,223,254)">
+                                            <img src="{{ url_for('static', filename='img/study.svg') }}"
+                                                style="width:125px;height:125px;" alt="Beginners Guide Logo">
                                         </div>
                                         <div class="card-body">
                                             <h4 class="card-title mb-2">Beginners Guide</h4>
@@ -98,9 +122,9 @@
                                 <a target="_blank" href="https://helpx.adobe.com/sign/tutorials.html"
                                     style="text-decoration: none; color: inherit;">
                                     <div class="card text-center w-75">
-                                        <div class="card-header" style = "background-color: rgba(219,223,254)">
+                                        <div class="card-header" style="background-color: rgba(219,223,254)">
                                             <img src="{{ url_for('static', filename='img/grad-cap.svg') }}"
-                                                style="width:50px;height:50px;" alt="Beginners Guide Logo">
+                                                style="width:125px;height:125px;" alt="Beginners Guide Logo">
                                         </div>
                                         <div class="card-body">
                                             <h4 class="card-title mb-2">Tutorials</h4>

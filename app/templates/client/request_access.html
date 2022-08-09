@@ -1,18 +1,253 @@
-{% extends "client/templates/request_template.html" %}
+{% extends "client/templates/public_template.html" %}
 <!-- This Jinja syntax extends my html template to this html file  -->
 
-{% block nav01 %}<a class="nav-link active" aria-current="true">Step 1: Request Access</a>{% endblock %}
-{% block nav02 %}<a class="nav-link" href="/request-access-check">Step 2: Verify Accesss</a>{% endblock %}
+<!-- Site Title -->
+{% block title %}eSign Support - Request Access{% endblock %}
 
+<!-- Site Top Nav Bar  -->
+{% block nav1 %}<a class="nav-link" href="/open-ticket">Open Ticket</a>{% endblock %}
+{% block nav2 %}<a class="nav-link active" href="/request-access">Request Access</a>{% endblock %}
+{% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
+
+<!-- Page Breadcrumbs-->
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Request Access</li>
+{% endblock %}
+
+<!--Code Specific to this Page-->
 {% block main %}
-<div class="row">
-    <div class="col ms-3">
-        <h5>Step 1: Secure Request</h5>
-        <p>In order to get access to Acrobat Sign on UHG's account you mut submit a secure request. To submit one go to <a
-                target="_blank" href="https://secure.uhc.com">secure.uhc.com</a> and follow the video instructions
-            below:</p>
-        <img class="ms-3" src="{{ url_for('static', filename='img/request_access.mp4') }}" alt="video of request process"
-            width="958" height="432">
+
+<!--Flask Flash Message 'Access Check Success'-->
+{% with messages = get_flashed_messages(category_filter=["access_success"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
+    <div class="alert-heading align-items-center">
+        <h4 style="text-transform: uppercase; position: relative;">{{ message }} Has Access</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following user {{ message }} has access to Adobe Acrobat Sign!</p>
+    <hr>
+    <p>Login to <a target="_blank" href="https://unitedhg.na3.adobesign.com/account/homeJS">Adobe Acrobat Sign</a>!</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Access Check Incomplete'-->
+{% with messages = get_flashed_messages(category_filter=["default_group"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+    <div class="alert-heading align-items-center">
+        <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following user {{ message }} has access to Adobe Acrobat Sign, but by default all users originally
+        provisioned into Acrobat Sign are assigned to a group with very limited functionality. In access core
+        functionality {{ message }} will need to reach out to
+        their group admin for group assignment.</p>
+    <hr>
+    <p>Don't know your group admin?... No worries use our <a href="/find-admin">Find My Admin tool</a></p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Domain Unclaimed'-->
+{% with messages = get_flashed_messages(category_filter=["domain_fail"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-danger alert-dismissible fade show mx-3" role="alert">
+    <div class="header">
+        <h4 style="text-transform: uppercase; position: relative;">{{ message }} NOT CLAIMED</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following domain <strong>{{ message }}</strong> is not claimed in UHG's Adobe Console. Users with that domain currently do not
+        have access to UHG's instance of Adobe Acrobat Sign.</p>
+    <hr>
+    <p class="mb-0">To speak with the eSignature Support Team about potentially claiming your domain <a target="_blank"
+            href="https://atlas.uhg.com/contactLanding/openTicket#">open a ticket</a>.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Not in AD Group'-->
+{% with messages = get_flashed_messages(category_filter=["adFail"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+    <div class="header">
+        <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following user <strong>{{ message }}</strong> is not part of the required security group. Please follow the
+        prompts below to request access.</p>
+    <hr class="mb-2">
+    <h5>After Submission:</h5>
+    <ul>
+        <li>Wait for your request to be approved by your manager and the eSignature Support Team.</li>
+        <li>Once your reqest is approved the system will automatically create an account in Adobe Acrobat Sign. This
+            automated sync process can take up to three hours.</li>
+    </ul>
+    <hr class="mb-2">
+    <h5>How to Verify:</h5>
+    <p>To verify next steps in the request process, submit your email again using this tool. If you get this same
+        alert that means one of the following: Your request has not yet been
+        approved or was denied, the automatted sync tool is still running.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Not in AD Group'-->
+{% with messages = get_flashed_messages(category_filter=["unknown"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-danger alert-dismissible fade show mx-3" role="alert">
+    <div class="header">
+        <h4 style="text-transform: uppercase; position: relative;">Unknown Error</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following user <strong>{{ message }}</strong> is not in Adobe Acrobat Sign although following the correct
+        request procedures.</p>
+    <hr class="mb-2">
+    <p>This error is uncommon but can happen during the request process based on a variety of circumstances. Please <a
+            target="_blank" href="https://atlas.uhg.com/contactLanding/openTicket#">open a ticket</a> with the
+        eSignature Support Team so they can further troubleshoot the provisioning error.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<!--Secure Request Process-->
+<div class="container-fluid px-4 mt-3">
+    <div class="row gx-5">
+        <div class="col">
+            <div class="row">
+                <h1>Request Access</h1>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <img height="500" src="{{ url_for('static', filename='img/request_access_logo.svg') }}"
+                        alt="request access visual">
+                </div>
+                <div class="col text-center my-auto">
+                    <strong>Access to Adobe Acrobat Sign requires submitting a Secure request for a specific group
+                        membership.</strong>
+                    <!--Link to Secure.UHC-->
+                    <div>
+                        <a class="btn btn-primary btn-lg my-3" target="_blank" href="https://secure.uhc.com">Request
+                            Access</a>
+                    </div>
+                    <!--Links to Instructions (written/video)-->
+                    <div class="mt-3">
+                        <!-- Video Instructions Trigger -->
+                        <button type="button" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal"
+                            data-bs-target="#videoModal">
+                            Video Instructions
+                        </button>
+                        <!--Written Instructions Trigger-->
+                        <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#textInstructions" aria-controls="offcanvasTop">Text
+                            Instructions</button>
+                    </div>
+                    <!-- Video Instructions -->
+                    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-fullscreen">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Secure Request Demonstration</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img class="ms-3" src="{{ url_for('static', filename='img/request_access.mp4') }}"
+                                        alt="video of request process" height="100%">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Written Instructions-->
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="textInstructions"
+                        aria-labelledby="offcanvasTopLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasTopLabel">Acrobat Sign Secure Request</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <strong class="mb-3">To start the Secure Request Process visit <a
+                                    href="https://secure.uhc.com">Secure.uhc.com</a></strong>
+                            <ol class="my-5" align="left">
+                                <li>Click 'Add Group Membership'</li>
+                                <li>Request for: <strong>Select 'Platform'</strong></li>
+                                <li>Platform: <strong>Select 'windows'</strong> (this is always windows even if you have
+                                    a MAC)</li>
+                                <li>Platform: <strong>Select 'MS'</strong></li>
+                                <li>Environment and Resource will auto populate to Prod and MS (leave this as is)</li>
+                                <li>Next select the user ID you wish to apply group assignment</li>
+                                <li>Search for group: <strong>'dtm_esignature'</strong></li>
+                                <li>From <strong>Available Groups</strong> select <strong>'dtm_esignature'</strong>.
+                                    Once selected, click
+                                    the right arrow to move dtm_esignature to <strong>Selected Groups</strong></li>
+                                <li>click <strong>'Next'</strong></li>
+                                <li>For Access Expires: <strong>Select 'Permanent'</strong></li>
+                                <li>Supply a business justification</li>
+                            </ol>
+                            <strong>This secure request requires approval from the eSignature Support Team and the
+                                submitters manager!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Verify Access Tool-->
+        <div class="col">
+            <h1>Verify Access</h5>
+                <p class="card-text text-center">
+                    Requesting access to Adobe Acrobat Sign is a multi-step process that requires action from the
+                    end-user
+                    and the eSignature Support Team. To simplify the request process please fill in your business
+                    email
+                    below, once submitted this webpage will generate detailed instructions on the steps needed to
+                    request
+                    access for the inputted user email. Steps will vary depending on where you are in the request
+                    process.
+                </p>
+                <!--Verify Email Form-->
+                <form action="/request-access" method="POST">
+                    <div class="form-group">
+                        <!--Flash Message (email validation)-->
+                        {% with messages = get_flashed_messages(category_filter=["email"]) %}
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>{{ message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <div class="mb-3">
+                            <label for="useremail" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="useremail" aria-describedby="emailHelp"
+                                name="useremail" spellcheck="false" placeholder="example@domain.com">
+                            <div id="emailHelp" class="form-text">Enter your business email address, not your personal
+                                email.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+        </div>
     </div>
 </div>
 {% endblock %}
