@@ -2,10 +2,41 @@
 <!-- This Jinja syntax extends my html template to this html file  -->
 
 {% block nav01 %}<a class="nav-link active" aria-current="true" href="/find-admin">Find Group Admin</a>{% endblock %}
-{% block nav02 %}<a class="nav-link" href="/cancel-agreements">Cancel Agreements</a>{% endblock %}
+{% block nav02 %}<a class="nav-link disabled">Cancel Agreements</a>{% endblock %}
 {% block nav03 %}<a class="nav-link disabled">Lookup Webforms</a>{% endblock %}
 
 {% block main %}
+<!--Flask Flash Message 'Access Check Incomplete'-->
+{% with messages = get_flashed_messages(category_filter=["default_group"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+    <div class="alert-heading align-items-center">
+        <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following user {{ message }} has access to Adobe Acrobat Sign, but has not yet been assigned to a group. Please try another colleagues email or search by group.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Success Alert-->
+{{ alert|safe }}
+    {% for i in admindict: %}
+      <h6 class="mt-4">Group: {{ i }}</h6>
+      <hr class="mt-1">
+      <ul>
+      {% for i2 in admindict[i]: %}
+      <li>Admin Email: <strong>{{ i2["email"] }}</strong></li>
+      {% endfor %}
+      </ul>
+    {% endfor %}
+    </ul></div>
+  </div>
+
+
+
 <div class="row">
   <div class="col-sm-6">
     <div class="card border-primary mx-3">
@@ -44,22 +75,9 @@
     </div>
     </div>
   <div class="col-sm-6">
+    <img  class="w-75" src="{{ url_for('static', filename='img/find_admin.svg') }}" alt="Find Admin Visual">
     <!-- This Jinja code snippet allows me to pass html code from my python file to trigger an alert message. -->
-    {{ alert|safe }}
-    {% for i in admindict: %}
-      <h6 class="mt-4">Group: {{ i }}</h6>
-      <hr class="mt-1">
-      <ul>
-      {% for i2 in admindict[i]: %}
-      <li>Admin Email: <strong>{{ i2["email"] }}</strong></li>
-      {% endfor %}
-      </ul>
-    {% endfor %}
-    </ul></div>
-  </div>
 </div>
-
-
   <!--Search Display Text and Search Bar for Email Address and Group-->
   <script src="{{ url_for('static', filename='js/find-admin.js')}}"></script>
   {% endblock %}

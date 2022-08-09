@@ -320,12 +320,9 @@ def findadmin():
                             groups.append(group)
                         # Step 3 Failed: User is in Default Group
                         if len(groups) == 1 and group == "Default Group":
-                            print("Step 3 fail")
-                            alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Missing Group Assignment</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following user <strong>" + \
-                                email+"</strong> has an account in Acrobat Sign but is not part of a group.</p><p>Try using another colleague's email or search by group name.</div>"
                             print("User in Default Group")
-                            # renders HTML template and passed Alert which is HTML that gets appended
-                            return render_template("client/admin_lookup.html", alert=alert)
+                            flash(email, "default_group")
+                            return redirect(request.url)
                         # Step 3 Passed: User is in a group and active
                         else:
                             print("pass step 3")
