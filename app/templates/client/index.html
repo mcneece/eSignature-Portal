@@ -10,19 +10,22 @@
 {% block nav3 %}<a class="nav-link" href="/find-admin">Tools</a>{% endblock %}
 
 {% block main %}
-
 <div class="container-fluid">
-    <div class="row ms-5">
+    <div class="row ms-5 mb-3">
         <div class="col">
-            <div class="mb-5 mt-3">
-                <img class="me-2" src="{{ url_for('static', filename='img/adobe_fill_sign_logo.png') }}"
-                    alt="Acrobat Sign Logo" style="width:50px;height:50px;">
-                <span style="vertical-align: middle; font-size: 250%; font-weight: bold;">Adobe Acrobat Sign</span>
+            <div class="mb-3 mt-3">
+                <img class="me-2" src="{{ url_for('static', filename='img/Adobe_PROD_logo.svg') }}"
+                    alt="Acrobat Sign Logo" style="width:3vw">
+                <span style="vertical-align: middle; font-size: 250%; font-weight: bold; font-size:2vw;">Adobe Acrobat
+                    Sign</span>
             </div>
             <div align="center">
-                <p class="mb-0 pb-0" style="font-family: 'Trebuchet MS', sans-serif; font-size: 60px; font-weight: bold;">Collect Signatures</p>
-                <p style="font-family: 'Trebuchet MS', sans-serif; font-size: 60px; font-weight: bold;">on Documents Today!</p>
-                <p class="my-5" style="color:rgb(180, 139, 255)"><strong>eSignature is a method of collecting
+                <p class="mb-0 pb-0" style="font-family: 'Trebuchet MS', sans-serif; font-size:3vw; font-weight: bold;">
+                    Collect Signatures</p>
+                <p style="font-family: 'Trebuchet MS', sans-serif; font-size:3vw; font-weight: bold;">on Documents
+                    Today!</p>
+                <p class="my-3" style="color:rgb(180, 139, 255); font-size:1vw;"><strong>eSignature is a method of
+                        collecting
                         a signature(s) on a
                         document through electronic means, rather than
                         physically sending & signing paper.
@@ -33,7 +36,7 @@
             </div>
             <div align="center">
                 <!-- Button trigger Acrobat Links modal -->
-                <button type="button" class="btn btn-outline-primary btn-lg mt-3 mx-3" data-bs-toggle="modal"
+                <button type="button" class="btn btn-outline-primary mt-3 mx-3" data-bs-toggle="modal"
                     data-bs-target="#esignLinksModal">
                     Adobe Acrobat Sign
                 </button>
@@ -51,7 +54,8 @@
                                 <a target="_blank" href="https://unitedhg.na3.adobesign.com/account/homeJS"
                                     style="text-decoration: none; color: inherit;">
                                     <div class="card border-primary text-center mb-3">
-                                        <div class="card-header overflow-hidden p-0" style="background-color: rgba(219,223,254)">
+                                        <div class="card-header overflow-hidden p-0"
+                                            style="background-color: rgba(219,223,254)">
                                             <img class="w-75"
                                                 src="{{ url_for('static', filename='img/production_tile.svg') }}"
                                                 alt="Acrobat Sign Production Link">
@@ -68,7 +72,8 @@
                                 <a target="_blank" href="https://na1.documentssandbox.adobe.com/account/homeJS"
                                     style="text-decoration: none; color: inherit;">
                                     <div class="card border-primary text-center mb-3">
-                                        <div class="card-header overflow-hidden p-0" style="background-color: rgba(219,223,254)">
+                                        <div class="card-header overflow-hidden p-0"
+                                            style="background-color: rgba(219,223,254)">
                                             <img class="w-75"
                                                 src="{{ url_for('static', filename='img/sandbox_tile.svg') }}"
                                                 alt="Acrobat Sign Sandbox Link">
@@ -88,7 +93,7 @@
                     </div>
                 </div>
                 <!-- Button trigger Acrobat Training modal -->
-                <button type="button" class="btn btn-outline-warning btn-lg mt-3 mx-3" data-bs-toggle="modal"
+                <button type="button" class="btn btn-outline-warning mt-3 mx-3" data-bs-toggle="modal"
                     data-bs-target="#trainingModal">
                     Training Material
                 </button>
@@ -141,9 +146,13 @@
                 </div>
             </div>
         </div>
-        <div class="col">
-            <img class="w-100" src="{{ url_for('static', filename='img/esign.svg') }}" alt="eSignature Visual">
+        <div class="col h-100">
+            <img class="w-100" style="min-width: 600px;" src="{{ url_for('static', filename='img/esign.svg') }}"
+                alt="eSignature Visual">
         </div>
+    </div>
+    <div class="row mb-5">
+
     </div>
 </div>
 {% endblock %}
