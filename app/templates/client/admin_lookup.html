@@ -11,11 +11,12 @@
 {% if messages %}
 {% for message in messages %}
 <div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
-    <div class="alert-heading align-items-center">
-        <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <p>The following user {{ message }} has access to Adobe Acrobat Sign, but has not yet been assigned to a group. Please try another colleagues email or search by group.</p>
+  <div class="alert-heading align-items-center">
+    <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
+  </div>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <p>The following user {{ message }} has access to Adobe Acrobat Sign, but has not yet been assigned to a group. Please
+    try another colleagues email or search by group.</p>
 </div>
 {% endfor %}
 {% endif %}
@@ -23,33 +24,37 @@
 
 <!--Success Alert-->
 {{ alert|safe }}
-    {% for i in admindict: %}
-      <h6 class="mt-4">Group: {{ i }}</h6>
-      <hr class="mt-1">
-      <ul>
-      {% for i2 in admindict[i]: %}
-      <li>Admin Email: <strong>{{ i2["email"] }}</strong></li>
-      {% endfor %}
-      </ul>
-    {% endfor %}
-    </ul></div>
-  </div>
+{% for i in admindict: %}
+<h6 class="mt-4">Group: {{ i }}</h6>
+<hr class="mt-1">
+<ul>
+  {% for i2 in admindict[i]: %}
+  <li>Admin Email: <strong>{{ i2["email"] }}</strong></li>
+  {% endfor %}
+</ul>
+{% endfor %}
+</ul>
+</div>
+</div>
 <div class="row">
   <div class="col-sm-6">
     <div class="card border-primary mx-3 h-100">
       <div class="card-body" align="left">
         <h5>Find Group Admin</h5>
-        <p class="card-text">Group Admin's in Adobe Acrobat Sign are individuals who over see a specific group of users. Using this tool you can find your group admin and contact them to request access to their group, or to discuss changes that need to be made to the overall group settings.</p>
+        <p class="card-text">Group Admin's in Adobe Acrobat Sign are individuals who over see a specific group of users.
+          Using this tool you can find your group admin and contact them to request access to their group, or to discuss
+          changes that need to be made to the overall group settings.</p>
         <hr>
-        <p>You can find an admin by entering the name of an existing group, or by entering an active users email. If you choose to search by email this  will return that users' admin.</p>
+        <p>You can find an admin by entering the name of an existing group, or by entering an active users email. If you
+          choose to search by email this will return that users' admin.</p>
         <hr>
         <form action="/find-admin" method="POST">
           <div>
             <p>Search by Email or Group</p>
           </div>
-          <div class="form-group">
+          <div class="row form-group">
             <!-- Toggle HTML  -->
-             <div class="sliderspace float-start">
+            <div class="sliderspace float-start">
               <label id="group_label">Group</label>
               <label id="email_label" style="display: none;">Email</label>
               <label class="switch align-middle" onclick="toggleSlider()">
@@ -57,24 +62,26 @@
                 <span class="slider round"></span>
               </label>
             </div>
-            <div>
-              <input type="search" id="mySearch" style="display: none;" class="home-search-rectangle" spellcheck="false"
-                placeholder="Enter a Colleagues Email Address"
-                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                title="This top tooltip is themed via CSS variables." name="email" />
-              <input type="search" id="mySearch2" class="home-search-rectangle" spellcheck="false"
-                placeholder="Enter the Name of an Acrobat Sign Group" name="group"/>
+            <div class="row mt-2">
+              <div align="left">
+                <input type="search" id="mySearch" style="display: none;" spellcheck="false"
+                  placeholder="Enter a Colleagues Email Address" class="w-75" data-bs-toggle="tooltip"
+                  data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                  title="This top tooltip is themed via CSS variables." name="email" />
+                <input type="search" id="mySearch2" spellcheck="false" class="w-75"
+                  placeholder="Enter the Name of an Acrobat Sign Group" name="group" />
+              </div>
             </div>
-            <button type="submit" class="btn btn-primary float-start mt-2">Submit</button>
+            <button type="submit" class="btn btn-primary float-start w-25 mt-2 ms-3">Submit</button>
           </div>
         </form>
       </div>
     </div>
-    </div>
+  </div>
   <div class="col-sm-6">
-    <img  class="w-75" src="{{ url_for('static', filename='img/find_admin.svg') }}" alt="Find Admin Visual">
+    <img class="w-75" src="{{ url_for('static', filename='img/find_admin.svg') }}" alt="Find Admin Visual">
     <!-- This Jinja code snippet allows me to pass html code from my python file to trigger an alert message. -->
-</div>
+  </div>
   <!--Search Display Text and Search Bar for Email Address and Group-->
   <script src="{{ url_for('static', filename='js/find-admin.js')}}"></script>
   {% endblock %}
