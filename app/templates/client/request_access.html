@@ -160,8 +160,9 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <img class="ms-3" src="{{ url_for('static', filename='img/request_access.mp4') }}"
-                                alt="video of request process" height="100%">
+                            <video controls>
+                                <source src="{{ url_for('static', filename='img/request_access.mp4') }}">
+                            </video>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
