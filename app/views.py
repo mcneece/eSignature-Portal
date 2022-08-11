@@ -1,9 +1,10 @@
-from app import app # for running Flask app
-from flask import render_template, request, redirect, flash # for running python Flask app
+from app import app  # for running Flask app
+# for running python Flask app
+from flask import render_template, request, redirect, flash
 
 # Modules are not running when seperated in a different python file
-import requests # for making API call to Adobe
-import json # for capturing JSON data in Adobe API calls
+import requests  # for making API call to Adobe
+import json  # for capturing JSON data in Adobe API calls
 import pandas as pd  # for reading csv files (domains, AD group)
 
 # Start of Modules____________________________________________________________________________________
@@ -38,7 +39,7 @@ class AcrobatData(object):
     def emailvalidation(self, email):
         "This function will take the users input and determine if it is a legit email (email is formatted correctly), and also run a domain check"
         # HTML already catches the appropraite email format for only one @ sign
-        
+
         # If email = blank
         if email == "":
             return False, "No email given!"
@@ -73,7 +74,8 @@ class AcrobatData(object):
 
         payload = {}
         headers = {
-            'x-email': userinput, #email is required in the header to only retrieve data for that specific email
+            # email is required in the header to only retrieve data for that specific email
+            'x-email': userinput,
             'Authorization': self.bearer_id
         }
         response = requests.request("GET", url, headers=headers, data=payload)
@@ -86,7 +88,8 @@ class AcrobatData(object):
         # If response is not 404 and still not 200 then print code: and message: provided by adobe to console
         elif response.status_code != 200:
             # print error to log
-            print("users/userByEmail Response Error:",jsondata["code"], jsondata["message"])
+            print("users/userByEmail Response Error:",
+                  jsondata["code"], jsondata["message"])
             # Alert User in UI
             return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert"
         # response was 200 (email was found) return True and user's ID
@@ -115,7 +118,8 @@ class AcrobatData(object):
             print("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to UI for user
-            flash("users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert")
+            flash("users/userByEmail Response Error: " +
+                  jsondata["code"]+": "+jsondata["message"], "alert")
             return redirect(request.url)
 
         groupinfo = jsondata["groupInfoList"]
@@ -144,13 +148,14 @@ class AcrobatData(object):
             print("groups/"+groupID+"/users Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to user in UI
-            flash("groups/"+groupID+"/users Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert")
+            flash("groups/"+groupID+"/users Response Error: " +
+                  jsondata["code"]+": "+jsondata["message"], "alert")
             return redirect(request.url)
 
         # Creates a dictionary for grabing admins:
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
-        
+
         print(jsondata)
 
         for i in jsondata["userInfoList"]:
@@ -194,15 +199,14 @@ class AcrobatData(object):
             print("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert UI with error
-            flash("users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"])
-            return redirect(request.url)
+            return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
 
         groupID = ""
 
         for i in jsondata["groupInfoList"]:
             if groupName.lower() == i["groupName"].lower():
                 groupID = i["groupId"]
-        return groupID
+        return True, groupID
     # End of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # End of modules __________________________________________________________________________________________________________________________________________________
 
@@ -227,7 +231,8 @@ def signcheck():
 
         print("Access Check", userinput)
         # Step 1: Email Validation, this check will verify if the user input is a valid email
-        bool, message = ad.emailvalidation(userinput) #Bool is True if all email validation passed otherwise false, if True message = None, if False message has error for Flask Flash
+        # Bool is True if all email validation passed otherwise false, if True message = None, if False message has error for Flask Flash
+        bool, message = ad.emailvalidation(userinput)
         if bool == True:  # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
             # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
             # Returns True and user ID if their is a match, returns False and an error message if API call issue, return False and None if the email wasn't found
@@ -265,14 +270,14 @@ def signcheck():
                     print("Not in AD Group")
                     flash(userinput, "adFail")
                     return redirect(request.url)
-            else: # Error API call GET /user/userByEmail
+            else:  # Error API call GET /user/userByEmail
                 print("Error with API call GET /users/userByEmail")
                 flash(userId_message, "alert")
-                redirect(request.url)    
+                redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool == None:
             print("Failed domain check")
-            flash(message,"domain_fail")
+            flash(message, "domain_fail")
             return redirect(request.url)
         # Step 1 Failed: User inputed email in a invalid format
         else:
@@ -303,8 +308,8 @@ def findadmin():
             # If the user submited information in the email search run email search code:
             if len(email) > len(group):
                 # Step 1: Email Validation, this check will verify if the user input is a valid email
-                result, domain = ad.emailvalidation(email)
-                if result == True:  # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
+                bool, message = ad.emailvalidation(email)
+                if bool == True:  # Runs email through function that checks if it is formatted correctly, if so returns True, if not returns error message
                     # Step 2: Adobe Acrobat Sign Access Check, this check will look through a list of users in Adobe sign that are active and validate if the user input email is part of that list
                     # Returns True and user ID if their is a match, returns false if their isn't a match
                     result, userId = ad.acrobatSignAccessCheck(email)
@@ -329,42 +334,48 @@ def findadmin():
                             # Create a dictionary of admin and render it to the HTML file
                             for i in groupnameandid:  # For each group and id in the list merge the admins from that group to a dictionary
                                 # using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
-                                admindict = admindict | ad.usersInGroup(i[1], i[0])
-                            print(admindict)
+                                admindict = admindict | ad.usersInGroup(
+                                    i[1], i[0])
+                            print("Email: Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
-                        alert = "<div class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">No Account Found</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following email <strong>" + \
-                            email+"</strong> does not have an account in Adobe Acrobat Sign.</p><p class=\"mb-1\">Please try a different colleague email.</p></div>"
-                        print("Failed: No Account For Colleague")
-                        return render_template("client/admin_lookup.html", alert=alert)
+                        print("Email: No Account Found")
+                        flash(email, "emailNotFound")
+                        return redirect(request.url)
                 # Step 1 Failed: users domain is not claimed in the UHG console
-                elif result == "invalid_domain":
+                elif bool == "invalid_domain":
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
-                        domain+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
+                        message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
                     print("Access Check: Unclaimed Domain")
                     return render_template("client/admin_lookup.html", alert=alert)
                 else:
-                    print("Need to add code at end of admin lookup module")
-            # If the user submited information in the group search run group search code:
+                    print("Invalid email format")
+                    flash(message, "email")
+                    return redirect(request.url)
             else:
-                groupid = ad.grouplist(group)
-                if groupid != "":
-                    # using the group ID, this call runs an API call to capture all users in that group and creates a dictionary of admins to return
-                    admindict = ad.usersInGroup(groupid, group)
-                    if len(admindict[group]) != 0:
-                        print(admindict)
-                        alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
-                        return render_template("client/admin_lookup.html", alert=alert, admindict=admindict)
+                result, groupid = ad.grouplist(group)
+                if result == True:
+                    if groupid != "":
+                        # using the group ID, this call runs an API call to capture all users in that group and creates a dictionary of admins to return
+                        admindict = ad.usersInGroup(groupid, group)
+                        if len(admindict[group]) != 0:
+                            print(admindict)
+                            alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
+                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict)
+                        else:
+                            print("Group: No Admin For this group")
+                            flash(group, "noAdmin")
+                            return redirect(request.url)
                     else:
-                        alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin Not Found</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following group <strong>" + \
-                            group+"</strong> does exist, but there is currently not an admin.</p><p>Please <a href=\"/find-admin\" class=\"alert-link\">open a ticket</a>with the eSignature Support Team to resolve. Or try using another group name or search by email.</p></div>"
+                        print("Group: No Account Found")
+                        flash(group, "groupNotFound")
+                        return redirect(request.url)
                 else:
-                    alert = "<div class=\"alert alert-warning alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Warning:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Group Not Found</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following group <strong>" + \
-                        group+"</strong> does not exist in UHG's Acobat Sign account.</p><p>Try using another group name or search by email.</div>"
-                    return render_template("client/admin_lookup.html", alert=alert)
+                    flash(groupid, "alert")
+                    return redirect(request.url)
     return render_template("client/admin_lookup.html")
 # End Find Admin Page_________________________________________________________________________________________________________________________________________________
 
@@ -395,6 +406,7 @@ def cancelnator():
     # if no comment give error
 
     return render_template("client/cancelnator.html")
+
 
 @app.route("/open-ticket")
 def openticket():

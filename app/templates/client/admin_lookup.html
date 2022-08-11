@@ -22,6 +22,53 @@
 {% endif %}
 {% endwith %}
 
+<!--Flask Flash Message 'Group Not Found'-->
+{% with messages = get_flashed_messages(category_filter=["emailNotFound"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+  <div class="alert-heading align-items-center">
+    <h4 style="text-transform: uppercase; position: relative;">{{ message }} Not Found</h4>
+  </div>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <p>The following user {{ message }} was not found in Adobe Acrobat Sign.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Group Not Found'-->
+{% with messages = get_flashed_messages(category_filter=["groupNotFound"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+  <div class="alert-heading align-items-center">
+    <h4 style="text-transform: uppercase; position: relative;">{{ message }} Not Found</h4>
+  </div>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <p>The following group {{ message }} was not found in Adobe Acrobat Sign.</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Group Not Found'-->
+{% with messages = get_flashed_messages(category_filter=["noAdmin"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+  <div class="alert-heading align-items-center">
+    <h4 style="text-transform: uppercase; position: relative;">{{ message }} Missing Admin</h4>
+  </div>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <p>The following group {{ message }} was found in Adobe Acrobat Sign, but do not have an admin assigned.</p>
+  <hr>
+  <p>Please open a ticket with the eSignature Support Team</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <!--Success Alert-->
 {{ alert|safe }}
 {% for i in admindict: %}
@@ -36,6 +83,8 @@
 </ul>
 </div>
 </div>
+
+
 <div class="row">
   <div class="col-sm-6">
     <div class="card border-primary mx-3 h-100">
@@ -64,12 +113,31 @@
             </div>
             <div class="row mt-2">
               <div align="left">
-                <input type="search" id="mySearch" style="display: none;" spellcheck="false"
-                  placeholder="Enter a Colleagues Email Address" class="w-75" data-bs-toggle="tooltip"
+
+                <!--Flash Message (email validation)-->
+                {% with messages = get_flashed_messages(category_filter=["email"]) %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                  <strong>{{ message }}</strong>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <input type="email" id="mySearch" style="display: none;" spellcheck="false"
+                  placeholder="colleague@example.com" class="w-75" data-bs-toggle="tooltip"
                   data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                   title="This top tooltip is themed via CSS variables." name="email" />
+                <div id="emailHelp" class="form-text" style="display: none;">
+                    Enter a colleagues email address!
+                </div>
                 <input type="search" id="mySearch2" spellcheck="false" class="w-75"
-                  placeholder="Enter the Name of an Acrobat Sign Group" name="group" />
+                  placeholder="Group Name" name="group" />
+                <div id="GroupHelp" class="form-text">
+                  Enter the name of an Acrobat Sign group
+                </div>
               </div>
             </div>
             <button type="submit" class="btn btn-primary float-start w-25 mt-2 ms-3">Submit</button>
