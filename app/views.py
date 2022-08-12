@@ -132,8 +132,8 @@ class AcrobatData(object):
     # Step 4
     def usersInGroup(self, groupID, groupName):
         "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
-
-        url = app.config["REQUEST_URL_GROUPS"]+"/"+groupID+"/users"
+        #This only works if our Group Sizes stay under 5k
+        url = app.config["REQUEST_URL_GROUPS"]+"/"+groupID+"/users?pageSize=5000"
 
         payload = {}
         headers = {
