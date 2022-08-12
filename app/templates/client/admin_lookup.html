@@ -125,16 +125,19 @@
                 {% endfor %}
                 {% endif %}
                 {% endwith %}
-
-                <input type="email" id="mySearch" style="display: none;" spellcheck="false"
-                  placeholder="colleague@example.com" class="w-75" data-bs-toggle="tooltip"
-                  data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                  title="This top tooltip is themed via CSS variables." name="email" />
-                <div id="emailHelp" class="form-text" style="display: none;">
-                    Enter a colleagues email address!
+                <div>
+                  <input type="email" id="mySearch" style="display: none;" spellcheck="false"
+                    placeholder="colleague@example.com" class="w-75" data-bs-toggle="tooltip" data-bs-placement="top"
+                    data-bs-custom-class="custom-tooltip" title="This top tooltip is themed via CSS variables."
+                    name="email" />
                 </div>
-                <input type="search" id="mySearch2" spellcheck="false" class="w-75"
-                  placeholder="Group Name" name="group" />
+                <div id="emailHelp" class="form-text" style="display: none;">
+                  Enter a colleagues email address!
+                </div>
+                <div>
+                  <input type="search" id="mySearch2" spellcheck="false" class="w-75" placeholder="Group Name"
+                    name="group" />
+                </div>
                 <div id="GroupHelp" class="form-text">
                   Enter the name of an Acrobat Sign group
                 </div>
