@@ -56,8 +56,8 @@ class AcrobatData(object):
         subdomain, tld = domainname.split(".")
 
         # is top-level domain (TLD) legit?
-        if tld not in ["com", "edu", "org", "gov"]:
-            return False, "domain name must be one of the following: .com, .edu, .org, .gov"
+        if tld not in ["com", "edu", "org", "gov", "net"]:
+            return False, "domain name must be one of the following: .com, .edu, .org, .gov, .net"
 
         # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
         if domainname in self.valid_domains:
