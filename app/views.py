@@ -1,3 +1,4 @@
+from urllib import response
 from app import app  # for running Flask app
 # for running python Flask app
 from flask import render_template, request, redirect, flash
@@ -132,8 +133,9 @@ class AcrobatData(object):
     # Step 4
     def usersInGroup(self, groupID, groupName):
         "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
-        #This only works if our Group Sizes stay under 5k
-        url = app.config["REQUEST_URL_GROUPS"]+"/"+groupID+"/users?pageSize=5000"
+        # This only works if our Group Sizes stay under 5k
+        url = app.config["REQUEST_URL_GROUPS"] + \
+            "/"+groupID+"/users?pageSize=5000"
 
         payload = {}
         headers = {
@@ -156,8 +158,6 @@ class AcrobatData(object):
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
 
-        print(jsondata)
-
         for i in jsondata["userInfoList"]:
             if i["isGroupAdmin"] == True:
                 listofadmins[groupName].append(i)
@@ -166,14 +166,56 @@ class AcrobatData(object):
 
     def activeDirectoryCheck(self, email):
         "This function checks active directory to see the user is part of the required security group in Active Directory"
-        # Import csv file
+        # API AD Lookup
+        url = app.config["AD_REQUEST_URL_GETTOKEN"]
+
+        payload = json.dumps({
+            "client_id": app.config["CLIENTID"],
+            "client secret": app.config["CLIENTSECRET"],
+            "grant_type": "client_credentials"
+        })
+
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        jsondata = json.loads(response.text)
+
+        if response.status_code == 200:
+            print(jsondata["description"]) #This is for testing DELETE LATER
+
+            l = email.split("@")
+            username, domainname = l[0], l[1]
+
+            url = app.config["AD_REQUEST_URL_USERDETAILS"]+username+"%40"+domainname
+
+            payload = {}
+            headers = {
+                'Authorization': 'Bearer '+jsondata["access_tocken"]
+            }
+
+            response = requests.request(
+                "GET", url, headers=headers, data=payload)
+            
+            jsondata = json.loads(response.text)
+
+            if response.status_code == 200: #API success look through JSON data for group membership
+                print("Pass running GET UserDetails")# This is for testing DELETE LATER
+
+                for each in jsondata["memberOf"]:
+                    if each["name"] == "dtm_esignature":
+                        return True
+                return False
+        #If API call fails run backup CSV file
+        #Backup CSV file AD Lookup
         try:
             df = pd.read_csv(self.users_esignatures_file)
         except Exception as e:
             print("Error reading users Active Directory (dtm_esignature) file")
             flash("Error reading users Active Directory (dtm_esignature) file", "alert")
             return redirect(request.url)
-
+        print("Ran Backup CSV file")
         self.users_esignatures = df["Mail"].to_list()
 
         # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
