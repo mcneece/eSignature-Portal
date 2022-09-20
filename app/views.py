@@ -3,6 +3,9 @@ from app import app  # for running Flask app
 # for running python Flask app
 from flask import render_template, request, redirect, flash
 
+import logging
+logging.basicConfig(level=logging.DEBUG) # This is for development and to see what happens in each request
+
 # Modules are not running when seperated in a different python file
 import requests  # for making API call to Adobe
 
@@ -210,7 +213,9 @@ class AcrobatData(object):
 
                 for each in temp2["memberOf"]:
                     if each["name"] == "dtm_esignature":
+                        logging.debug('Pass AD API')
                         return True
+                logging.debug('Fail AD API')
                 return False
         #If API call fails run backup CSV file
         #Backup CSV file AD Lookup
@@ -225,8 +230,10 @@ class AcrobatData(object):
 
         # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
         if email in self.users_esignatures:
+            logging.debug('Passed AD Backup csv')
             return True
         else:
+            logging.debug('Fail AD Back csv')
             return False
     # end of Request Modules===========================================================================================================
     # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
