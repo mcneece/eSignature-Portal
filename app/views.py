@@ -5,6 +5,11 @@ from flask import render_template, request, redirect, flash
 
 # Modules are not running when seperated in a different python file
 import requests  # for making API call to Adobe
+
+from urllib3.exceptions import InsecureRequestWarning 
+# Suppress only the single warning from urllib3 needed.
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning) #This code is required to disable SSL cert verification for AD Lookup API call
+
 import json  # for capturing JSON data in Adobe API calls
 import pandas as pd  # for reading csv files (domains, AD group)
 
@@ -179,11 +184,10 @@ class AcrobatData(object):
             'Content-Type': 'application/json'
         }
 
-        response = requests.request("POST", url, headers=headers, data=payload)
+        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
         jsondata = json.loads(response.text)
 
         if response.status_code == 200:
-            print(jsondata["description"]) #This is for testing DELETE LATER
 
             l = email.split("@")
             username, domainname = l[0], l[1]
@@ -192,18 +196,19 @@ class AcrobatData(object):
 
             payload = {}
             headers = {
-                'Authorization': 'Bearer '+jsondata["access_tocken"]
+                'Authorization': 'Bearer '+jsondata["access_token"]
             }
 
             response = requests.request(
-                "GET", url, headers=headers, data=payload)
+                "GET", url, headers=headers, data=payload, verify=False)
             
             jsondata = json.loads(response.text)
 
             if response.status_code == 200: #API success look through JSON data for group membership
-                print("Pass running GET UserDetails")# This is for testing DELETE LATER
+                temp = jsondata['resource']
+                temp2 = temp['user']
 
-                for each in jsondata["memberOf"]:
+                for each in temp2["memberOf"]:
                     if each["name"] == "dtm_esignature":
                         return True
                 return False
