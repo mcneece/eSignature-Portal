@@ -179,7 +179,7 @@ class AcrobatData(object):
 
         payload = json.dumps({
             "client_id": app.config["CLIENTID"],
-            "client secret": app.config["CLIENTSECRET"],
+            "client_secret": app.config["CLIENTSECRET"],
             "grant_type": "client_credentials"
         })
 
