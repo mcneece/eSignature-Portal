@@ -135,8 +135,13 @@
                   Enter a colleagues email address!
                 </div>
                 <div>
-                  <input type="search" id="mySearch2" spellcheck="false" class="w-75" placeholder="Group Name"
-                    name="group" />
+                  <input list="group-list" id="mySearch2" name="group" placeholder="Group Name" spellcheck="false" class="w-75" autocomplete="off">
+
+                  <datalist id="group-list">
+                    {% for group in grouplist %}
+                    <option value="{{group}}">
+                    {% endfor %}
+                  </datalist>
                 </div>
                 <div id="GroupHelp" class="form-text">
                   Enter the name of an Acrobat Sign group

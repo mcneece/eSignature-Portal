@@ -1,21 +1,23 @@
+from urllib3.exceptions import InsecureRequestWarning
+import pandas as pd  # for reading csv files (domains, AD group)
+import json  # for capturing JSON data in Adobe API calls
+import requests  # for making API call to Adobe
 from urllib import response
 from app import app  # for running Flask app
 # for running python Flask app
 from flask import render_template, request, redirect, flash
 
 import logging
-logging.basicConfig(level=logging.DEBUG) # This is for development and to see what happens in each request
+# This is for development and to see what happens in each request
+logging.basicConfig(level=logging.DEBUG)
 
 # Modules are not running when seperated in a different python file
-import requests  # for making API call to Adobe
 
-from urllib3.exceptions import InsecureRequestWarning 
 # Suppress only the single warning from urllib3 needed.
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning) #This code is required to disable SSL cert verification for AD Lookup API call
+# This code is required to disable SSL cert verification for AD Lookup API call
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-import json  # for capturing JSON data in Adobe API calls
-import pandas as pd  # for reading csv files (domains, AD group)
-
+                                                                                                                                                                                                                                                                                                                                                                                                                       
 # Start of Modules____________________________________________________________________________________
 
 
@@ -31,6 +33,7 @@ class AcrobatData(object):
         self.users_esignatures_file = users_esignatures_file
         self.users_esignatures = None
         self.bearer_id = None
+        self.groups = None
 
         # using pandas to read in the csv file as a dataframe and then extract each column I need as a list
         try:
@@ -187,7 +190,8 @@ class AcrobatData(object):
             'Content-Type': 'application/json'
         }
 
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = requests.request(
+            "POST", url, headers=headers, data=payload, verify=False)
         jsondata = json.loads(response.text)
 
         if response.status_code == 200:
@@ -195,7 +199,8 @@ class AcrobatData(object):
             l = email.split("@")
             username, domainname = l[0], l[1]
 
-            url = app.config["AD_REQUEST_URL_USERDETAILS"]+username+"%40"+domainname
+            url = app.config["AD_REQUEST_URL_USERDETAILS"] + \
+                username+"%40"+domainname
 
             payload = {}
             headers = {
@@ -204,10 +209,10 @@ class AcrobatData(object):
 
             response = requests.request(
                 "GET", url, headers=headers, data=payload, verify=False)
-            
+
             jsondata = json.loads(response.text)
 
-            if response.status_code == 200: #API success look through JSON data for group membership
+            if response.status_code == 200:  # API success look through JSON data for group membership
                 temp = jsondata['resource']
                 temp2 = temp['user']
 
@@ -217,8 +222,8 @@ class AcrobatData(object):
                         return True
                 logging.debug('Fail AD API')
                 return False
-        #If API call fails run backup CSV file
-        #Backup CSV file AD Lookup
+        # If API call fails run backup CSV file
+        # Backup CSV file AD Lookup
         try:
             df = pd.read_csv(self.users_esignatures_file)
         except Exception as e:
@@ -235,11 +240,11 @@ class AcrobatData(object):
         else:
             logging.debug('Fail AD Back csv')
             return False
-    # end of Request Modules===========================================================================================================
-    # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def grouplist(self, groupName):
-        url = app.config["REQUEST_URL_GROUPS"]+"?pageSize=500"
+    def creategrouplist(self):
+        "this function creates a list of groups in Adobe Acrobat Sign"
+        
+        url = app.config["REQUEST_URL_GROUPS"]+"?pageSize=750"
 
         payload = {}
         headers = {
@@ -248,10 +253,29 @@ class AcrobatData(object):
         response = requests.request("GET", url, headers=headers, data=payload)
         jsondata = json.loads(response.text)
 
+        grouplist=[]
+        for each in jsondata["groupInfoList"]:
+            grouplist.append(each["groupName"])
+            
+        return grouplist
+# end of Request Modules===========================================================================================================
+# Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+    def grouplist(self, groupName):
+        url = app.config["REQUEST_URL_GROUPS"]+"?pageSize=500"
+
+        payload = {}
+        headers = {
+            'Authorization': self.bearer_id
+            }
+        response = requests.request("GET", url, headers=headers, data=payload)
+        jsondata = json.loads(response.text)
+
         if response.status_code != 200:
             # Print error to log
             print("users/userByEmail Response Error:",
-                  jsondata["code"], jsondata["message"])
+                    jsondata["code"], jsondata["message"])
             # Alert UI with error
             return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
 
@@ -346,12 +370,13 @@ def signcheck():
 @app.route("/find-admin", methods=["GET", "POST"])
 def findadmin():
     "This webpage is for users who don't know who their admin is"
+    
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
                      # This file stores all AD users in the dtm_esignature security group
                      users_esignatures_file="data_files/dtm_esignature_users.csv",
                      cached=True)  # will use this value later on when I implement powershell script for AD lookup
-
+    grouplist = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
 
     if request.method == "POST":
@@ -392,19 +417,19 @@ def findadmin():
                                     i[1], i[0])
                             print("Email: Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
-                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict)
+                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
                         print("Email: No Account Found")
                         flash(email, "emailNotFound")
                         return redirect(request.url)
                 # Step 1 Failed: users domain is not claimed in the UHG console
-                elif bool == "invalid_domain":
+                elif bool == None:
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
                     print("Access Check: Unclaimed Domain")
-                    return render_template("client/admin_lookup.html", alert=alert)
+                    return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist)
                 else:
                     print("Invalid email format")
                     flash(message, "email")
@@ -418,7 +443,7 @@ def findadmin():
                         if len(admindict[group]) != 0:
                             print(admindict)
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
-                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict)
+                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                         else:
                             print("Group: No Admin For this group")
                             flash(group, "noAdmin")
@@ -430,7 +455,7 @@ def findadmin():
                 else:
                     flash(groupid, "alert")
                     return redirect(request.url)
-    return render_template("client/admin_lookup.html")
+    return render_template("client/admin_lookup.html", grouplist=grouplist)
 # End Find Admin Page_________________________________________________________________________________________________________________________________________________
 
 
