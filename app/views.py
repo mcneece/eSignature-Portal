@@ -1,4 +1,3 @@
-from urllib3.exceptions import InsecureRequestWarning
 import pandas as pd  # for reading csv files (domains, AD group)
 import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
@@ -7,14 +6,17 @@ from app import app  # for running Flask app
 # for running python Flask app
 from flask import render_template, request, redirect, flash
 
+# Setup Logging For Debugging
+import datetime
+now = datetime.datetime.now()
+logfile = now.strftime('myfile_%d%m%Y.log')
+logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
 import logging
-# This is for development and to see what happens in each request
-logging.basicConfig(level=logging.DEBUG)
-
-# Modules are not running when seperated in a different python file
+logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
 
 # Suppress only the single warning from urllib3 needed.
 # This code is required to disable SSL cert verification for AD Lookup API call
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
                                                                                                                                                                                                                                                                                                                                                                                                                        
