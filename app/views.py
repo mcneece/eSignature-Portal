@@ -415,8 +415,7 @@ def findadmin():
                             # Create a dictionary of admin and render it to the HTML file
                             for i in groupnameandid:  # For each group and id in the list merge the admins from that group to a dictionary
                                 # using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
-                                admindict = admindict | ad.usersInGroup(
-                                    i[1], i[0])
+                                admindict = admindict | ad.usersInGroup(i[1], i[0])
                             print("Email: Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
