@@ -7,12 +7,12 @@ from app import app  # for running Flask app
 from flask import render_template, request, redirect, flash
 
 # Setup Logging For Debugging
-import datetime
-now = datetime.datetime.now()
-logfile = now.strftime('myfile_%d%m%Y.log')
-logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
-import logging
-logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
+#import datetime
+#now = datetime.datetime.now()
+#logfile = now.strftime('myfile_%d%m%Y.log')
+#logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
+#import logging
+#logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
 
 # Suppress only the single warning from urllib3 needed.
 # This code is required to disable SSL cert verification for AD Lookup API call
@@ -220,28 +220,32 @@ class AcrobatData(object):
 
                 for each in temp2["memberOf"]:
                     if each["name"] == "dtm_esignature":
-                        logging.debug('Pass AD API')
+                        logging.debug('Used AD API, Pass dtm found!')
                         return True
-                logging.debug('Fail AD API')
+                logging.debug('Used AD API, dtm_esiganture not found')
                 return False
+            elif response.status_code == 404:
+                logging.debug('Used AD API, email not found in active directory')
+                return False
+            else:
         # If API call fails run backup CSV file
         # Backup CSV file AD Lookup
-        try:
-            df = pd.read_csv(self.users_esignatures_file)
-        except Exception as e:
-            print("Error reading users Active Directory (dtm_esignature) file")
-            flash("Error reading users Active Directory (dtm_esignature) file", "alert")
-            return redirect(request.url)
-        print("Ran Backup CSV file")
-        self.users_esignatures = df["Mail"].to_list()
+                try:
+                    df = pd.read_csv(self.users_esignatures_file)
+                except Exception as e:
+                    print("Error reading users Active Directory (dtm_esignature) file")
+                    flash("Error reading users Active Directory (dtm_esignature) file", "alert")
+                    return redirect(request.url)
+                print("Ran Backup CSV file")
+                self.users_esignatures = df["Mail"].to_list()
 
-        # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
-        if email in self.users_esignatures:
-            logging.debug('Passed AD Backup csv')
-            return True
-        else:
-            logging.debug('Fail AD Back csv')
-            return False
+                # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
+                if email in self.users_esignatures:
+                    logging.debug('Used backup CSV file, Pass')
+                    return True
+                else:
+                    logging.debug('Used backup CSV file, Fail')
+                    return False
 
     def creategrouplist(self):
         "this function creates a list of groups in Adobe Acrobat Sign"
