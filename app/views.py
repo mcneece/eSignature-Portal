@@ -7,12 +7,12 @@ from app import app  # for running Flask app
 from flask import render_template, request, redirect, flash
 
 # Setup Logging For Debugging
-#import datetime
-#now = datetime.datetime.now()
-#logfile = now.strftime('myfile_%d%m%Y.log')
-#logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
-#import logging
-#logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
+import datetime
+now = datetime.datetime.now()
+logfile = now.strftime('myfile_%d%m%Y.log')
+logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
+import logging
+logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
 
 # Suppress only the single warning from urllib3 needed.
 # This code is required to disable SSL cert verification for AD Lookup API call
