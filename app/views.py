@@ -360,7 +360,7 @@ def signcheck():
                     target = request.url
                     if target == request.url:
                         return redirect(target)
-            elif result == None:
+            elif result is None:
                 result = ad.activeDirectoryCheck(userinput)
                 # Step 4: Check Security Group (dtm_esignature)
                 # Step 4 passed: user is in the correct security group
@@ -387,7 +387,7 @@ def signcheck():
                 if target == request.url:
                     return redirect(target)
         # Step 1 Failed: users domain is not claimed in the UHG console
-        elif bool == None:
+        elif bool is None:
             print("Failed domain check")
             flash(message, "domain_fail")
             # Redirection from remote source (validate user input to reduce phising attempts)
@@ -470,7 +470,7 @@ def findadmin():
                         if target == request.url:
                             return redirect(target)
                 # Step 1 Failed: users domain is not claimed in the UHG console
-                elif bool == None:
+                elif bool is None:
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
