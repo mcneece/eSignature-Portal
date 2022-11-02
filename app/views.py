@@ -1,7 +1,6 @@
 import pandas as pd  # for reading csv files (domains, AD group)
 import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
-from urllib import response
 from app import app  # for running Flask app
 # for running python Flask app
 from flask import render_template, request, redirect, flash
