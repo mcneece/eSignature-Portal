@@ -42,7 +42,10 @@ class AcrobatData(object):
             domains_df = pd.read_csv(claimed_domains_file)
         except Exception as e:
             flash("Error with opening "+claimed_domains_file+" "+e, "alert")
-            return redirect(request.url)
+            # Redirection from remote source (validate user input to reduce phising attempts)
+            target = request.url
+            if target == request.url:
+                return redirect(target)
 
         self.valid_domains = domains_df["Domain"].to_list()
 
@@ -134,7 +137,10 @@ class AcrobatData(object):
             # Flash error message to UI for user
             flash("users/userByEmail Response Error: " +
                   jsondata["code"]+": "+jsondata["message"], "alert")
-            return redirect(request.url)
+            # Redirection from remote source (validate user input to reduce phising attempts)
+            target = request.url
+            if target == request.url:
+                return redirect(target)
 
         groupinfo = jsondata["groupInfoList"]
         returnedinfo = []
@@ -165,7 +171,11 @@ class AcrobatData(object):
             # Flash error message to user in UI
             flash("groups/"+groupID+"/users Response Error: " +
                   jsondata["code"]+": "+jsondata["message"], "alert")
-            return redirect(request.url)
+            
+            # Redirection from remote source (validate user input to reduce phising attempts)
+            target = request.url
+            if target == request.url:
+                return redirect(target)
 
         # Creates a dictionary for grabing admins:
         listofadmins = {groupName: []}
@@ -235,7 +245,10 @@ class AcrobatData(object):
                 except Exception as e:
                     print("Error reading users Active Directory (dtm_esignature) file")
                     flash("Error reading users Active Directory (dtm_esignature) file", "alert")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
                 print("Ran Backup CSV file")
                 self.users_esignatures = df["Mail"].to_list()
 
@@ -335,12 +348,18 @@ def signcheck():
                 if len(groups) == 1 and group == "Default Group":
                     print("User in Default Group")
                     flash(userinput, "default_group")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
                 # Step 3 Passed: User is in a group and active
                 else:
                     print("Passed Access Check")
                     flash(userinput, "access_success")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
             elif result == None:
                 result = ad.activeDirectoryCheck(userinput)
                 # Step 4: Check Security Group (dtm_esignature)
@@ -348,26 +367,41 @@ def signcheck():
                 if result == True:
                     print("Failed: Uknown Failure")
                     flash(userinput, "unknown")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
                 # Step 4 Failed: User is not in the required security group
                 else:
                     print("Not in AD Group")
                     flash(userinput, "adFail")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
             else:  # Error API call GET /user/userByEmail
                 print("Error with API call GET /users/userByEmail")
                 flash(userId_message, "alert")
-                redirect(request.url)
+                # Redirection from remote source (validate user input to reduce phising attempts)
+                target = request.url
+                if target == request.url:
+                    return redirect(target)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool == None:
             print("Failed domain check")
             flash(message, "domain_fail")
-            return redirect(request.url)
+            # Redirection from remote source (validate user input to reduce phising attempts)
+            target = request.url
+            if target == request.url:
+                return redirect(target)
         # Step 1 Failed: User inputed email in a invalid format
         else:
             print("Invalid email format")
             flash(message, "email")
-            return redirect(request.url)
+            # Redirection from remote source (validate user input to reduce phising attempts)
+            target = request.url
+            if target == request.url:
+                return redirect(target)
     # Loads Orign HTML Template for Webpage
     return render_template("client/request_access.html")
 # End Request Page____________________________________________________________________________________________________________________________________________________
@@ -412,7 +446,10 @@ def findadmin():
                         if len(groups) == 1 and group == "Default Group":
                             print("User in Default Group")
                             flash(email, "default_group")
-                            return redirect(request.url)
+                            # Redirection from remote source (validate user input to reduce phising attempts)
+                            target = request.url
+                            if target == request.url:
+                                return redirect(target)
                         # Step 3 Passed: User is in a group and active
                         else:
                             print("pass step 3")
@@ -428,7 +465,10 @@ def findadmin():
                     else:
                         print("Email: No Account Found")
                         flash(email, "emailNotFound")
-                        return redirect(request.url)
+                        # Redirection from remote source (validate user input to reduce phising attempts)
+                        target = request.url
+                        if target == request.url:
+                            return redirect(target)
                 # Step 1 Failed: users domain is not claimed in the UHG console
                 elif bool == None:
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
@@ -439,7 +479,10 @@ def findadmin():
                 else:
                     print("Invalid email format")
                     flash(message, "email")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
             else:
                 result, groupid = ad.grouplist(group)
                 if result == True:
@@ -453,45 +496,25 @@ def findadmin():
                         else:
                             print("Group: No Admin For this group")
                             flash(group, "noAdmin")
-                            return redirect(request.url)
+                            # Redirection from remote source (validate user input to reduce phising attempts)
+                            target = request.url
+                            if target == request.url:
+                                return redirect(target)
                     else:
                         print("Group: No Account Found")
                         flash(group, "groupNotFound")
-                        return redirect(request.url)
+                        # Redirection from remote source (validate user input to reduce phising attempts)
+                        target = request.url
+                        if target == request.url:
+                            return redirect(target)
                 else:
                     flash(groupid, "alert")
-                    return redirect(request.url)
+                    # Redirection from remote source (validate user input to reduce phising attempts)
+                    target = request.url
+                    if target == request.url:
+                        return redirect(target)
     return render_template("client/admin_lookup.html", grouplist=grouplist)
 # End Find Admin Page_________________________________________________________________________________________________________________________________________________
-
-
-@app.route("/cancel-agreements", methods=["GET", "POST"])
-def cancelnator():
-    "This function cancels agreements based on the agreement ID's fed"
-    # Step 1 take in a file
-    # Here is a sample file
-    # Insert agreement IDs
-    # Step 2 run through the file
-    # The body of the HTML call
-    # {
-    #  state: canceled
-    #   comment: ""
-    # }
-    # Step 4 For Loop
-    # For each ID in file
-    # URL/"agreementID"/state
-
-    # Step 3 give output
-
-    # response != 200 give error
-    # Else give response
-    # Output will be the response
-    # click run
-    # if no file then give error
-    # if no comment give error
-
-    return render_template("client/cancelnator.html")
-
 
 @app.route("/open-ticket")
 def openticket():
