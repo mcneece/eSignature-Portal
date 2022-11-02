@@ -8,7 +8,6 @@ from flask import render_template, request, redirect, flash
 # Setup Logging For Debugging
 import datetime
 now = datetime.datetime.now()
-logfile = now.strftime('myfile_%d%m%Y.log')
 logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
 import logging
 logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
