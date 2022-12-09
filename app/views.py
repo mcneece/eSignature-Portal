@@ -1,4 +1,4 @@
-import pandas as pd  # for reading csv files (domains, AD group)
+import pandas as pd  # for reading csv files (domains, AD group backup file)
 import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
 from app import app  # for running Flask app
@@ -8,9 +8,16 @@ from flask import render_template, request, redirect, flash
 # Setup Logging For Debugging
 import datetime
 now = datetime.datetime.now()
-logfile = now.strftime('e://supportportallogs//supportportal_%d%m%Y.log')
+debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')
+infologfile = now.strftime('Logs/%b %d %Y INFO.log')
 import logging
-logging.basicConfig(filename=(logfile), encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename=(debuglogfile), encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename=(infologfile), encoding='utf-8', level=logging.INFO)
+# Logic to delete log files after 2 days
+import os
+files = os.listdir("Logs")
+if len(files) > 3:
+    os.remove('Logs/'+files[1])
 
 # Suppress only the single warning from urllib3 needed.
 # This code is required to disable SSL cert verification for AD Lookup API call
@@ -19,8 +26,6 @@ requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
                                                                                                                                                                                                                                                                                                                                                                                                                        
 # Start of Modules____________________________________________________________________________________
-
-
 class AcrobatData(object):
     "Grouping of methods that takes a user input and checks their Acrobat Sign access as well as giving them information on potential solutions if they do not pass validation"
     # Start of Request Modules========================================================================
@@ -39,11 +44,10 @@ class AcrobatData(object):
         try:
             domains_df = pd.read_csv(claimed_domains_file)
         except Exception as e:
+            logging.error('Error with opening claimed fomains File __init__')
             flash("Error with opening "+claimed_domains_file+" "+e, "alert")
             # Redirection from remote source (validate user input to reduce phising attempts)
-            target = request.url
-            if target == request.url:
-                return redirect(target)
+            return redirect(request.url)
 
         self.valid_domains = domains_df["Domain"].to_list()
 
@@ -68,11 +72,11 @@ class AcrobatData(object):
             return False, "domain-name must have exactly one '.'!"
 
         # split into subdomain and top-level domain (TLD)
-        subdomain, tld = domainname.split(".")
+        subdomain, topleveldomain = domainname.split(".")
 
         # is top-level domain (TLD) legit?
-        if tld not in ["com", "edu", "org", "gov", "net"]:
-            return False, "domain name must be one of the following: .com, .edu, .org, .gov, .net"
+        if topleveldomain not in ["com", "edu", "org", "gov", "net"]:
+            return False, "domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net"
 
         # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
         if domainname in self.valid_domains:
@@ -199,64 +203,66 @@ class AcrobatData(object):
         headers = {
             'Content-Type': 'application/json'
         }
-
-        response = requests.request(
-            "POST", url, headers=headers, data=payload, verify=False)
-        jsondata = json.loads(response.text)
-
-        if response.status_code == 200:
-
-            l = email.split("@")
-            username, domainname = l[0], l[1]
-
-            url = app.config["AD_REQUEST_URL_USERDETAILS"] + \
-                username+"%40"+domainname
-
-            payload = {}
-            headers = {
-                'Authorization': 'Bearer '+jsondata["access_token"]
-            }
-
+        try:
             response = requests.request(
-                "GET", url, headers=headers, data=payload, verify=False)
-
+                "POST", url, headers=headers, data=payload, verify=False)
             jsondata = json.loads(response.text)
 
-            if response.status_code == 200:  # API success look through JSON data for group membership
-                temp = jsondata['resource']
-                temp2 = temp['user']
+            if response.status_code == 200:
 
-                for each in temp2["memberOf"]:
-                    if each["name"] == "dtm_esignature":
-                        logging.debug('Used AD API, Pass dtm found!')
-                        return True
-                logging.debug('Used AD API, dtm_esiganture not found')
-                return False
-            elif response.status_code == 404:
-                logging.debug('Used AD API, email not found in active directory')
-                return False
-            else:
+                l = email.split("@")
+                username, domainname = l[0], l[1]
+
+                url = app.config["AD_REQUEST_URL_USERDETAILS"] + \
+                    username+"%40"+domainname
+
+                payload = {}
+                headers = {
+                    'Authorization': 'Bearer '+jsondata["access_token"]
+                }
+
+                response = requests.request(
+                    "GET", url, headers=headers, data=payload, verify=False)
+
+                jsondata = json.loads(response.text)
+
+                if response.status_code == 200:  # API success look through JSON data for group membership
+                    temp = jsondata['resource']
+                    temp2 = temp['user']
+
+                    for each in temp2["memberOf"]:
+                        if each["name"] == "dtm_esignature":
+                            logging.info('Used AD API, dtm_esignature found for '+email)
+                            return True
+                    logging.info('Used AD API, dtm_esiganture not found for'+email)
+                    return False
+                elif response.status_code == 404:
+                    logging.info('Used AD API, email ('+email+') not found in active directory')
+                    return False
+        except Exception as fail:
+            logging.warn('Did not use AD API')
+        
         # If API call fails run backup CSV file
         # Backup CSV file AD Lookup
-                try:
-                    df = pd.read_csv(self.users_esignatures_file)
-                except Exception as e:
-                    print("Error reading users Active Directory (dtm_esignature) file")
-                    flash("Error reading users Active Directory (dtm_esignature) file", "alert")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
-                print("Ran Backup CSV file")
-                self.users_esignatures = df["Mail"].to_list()
+            try:
+                df = pd.read_csv(self.users_esignatures_file)
+            except Exception as e:
+                logging.warn("Error reading users Active Directory (dtm_esignature) file")
+                flash("Error reading users Active Directory (dtm_esignature) file", "alert")
+                # Redirection from remote source (validate user input to reduce phising attempts)
+                target = request.url
+                if target == request.url:
+                    return redirect(target)
+            print("Ran Backup CSV file")
+            self.users_esignatures = df["Mail"].to_list()
 
-                # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
-                if email in self.users_esignatures:
-                    logging.debug('Used backup CSV file, Pass')
-                    return True
-                else:
-                    logging.debug('Used backup CSV file, Fail')
-                    return False
+            # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
+            if email in self.users_esignatures:
+                logging.debug('Used backup CSV file, Pass')
+                return True
+            else:
+                logging.debug('Used backup CSV file, Fail')
+                return False
 
     def creategrouplist(self):
         "this function creates a list of groups in Adobe Acrobat Sign"
@@ -270,10 +276,12 @@ class AcrobatData(object):
         response = requests.request("GET", url, headers=headers, data=payload)
         jsondata = json.loads(response.text)
 
+        counter = 0
         grouplist=[]
         for each in jsondata["groupInfoList"]:
             grouplist.append(each["groupName"])
-            
+            counter += 1
+        logging.info(str(counter)+' groups in account')
         return grouplist
 # end of Request Modules===========================================================================================================
 # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -291,7 +299,7 @@ class AcrobatData(object):
 
         if response.status_code != 200:
             # Print error to log
-            print("users/userByEmail Response Error:",
+            logging.warn("users/userByEmail Response Error:",
                     jsondata["code"], jsondata["message"])
             # Alert UI with error
             return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
@@ -308,6 +316,7 @@ class AcrobatData(object):
 
 @app.route("/")
 def home():
+    logging.debug('-----------------------    HOME PAGE     --------------------------------')
     "This is the home page containing information and links to Adobe Acrobat Sign, most of this code is in the index.html file"
     return render_template("client/index.html")
 # End Home Page____________________________________________________________________________________________________________________________________________________
@@ -315,6 +324,7 @@ def home():
 
 @app.route("/request-access", methods=["GET", "POST"])
 def signcheck():
+    logging.debug('-----------------------    REQUEST ACCESS PAGE    --------------------------------')
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
@@ -346,18 +356,12 @@ def signcheck():
                 if len(groups) == 1 and group == "Default Group":
                     print("User in Default Group")
                     flash(userinput, "default_group")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
                 # Step 3 Passed: User is in a group and active
                 else:
                     print("Passed Access Check")
                     flash(userinput, "access_success")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
             elif result is None:
                 result = ad.activeDirectoryCheck(userinput)
                 # Step 4: Check Security Group (dtm_esignature)
@@ -365,33 +369,21 @@ def signcheck():
                 if result == True:
                     print("Failed: Uknown Failure")
                     flash(userinput, "unknown")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
                 # Step 4 Failed: User is not in the required security group
                 else:
                     print("Not in AD Group")
                     flash(userinput, "adFail")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
             else:  # Error API call GET /user/userByEmail
                 print("Error with API call GET /users/userByEmail")
                 flash(userId_message, "alert")
-                # Redirection from remote source (validate user input to reduce phising attempts)
-                target = request.url
-                if target == request.url:
-                    return redirect(target)
+                return redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool is None:
             print("Failed domain check")
             flash(message, "domain_fail")
-            # Redirection from remote source (validate user input to reduce phising attempts)
-            target = request.url
-            if target == request.url:
-                return redirect(target)
+            return redirect(request.url)
         # Step 1 Failed: User inputed email in a invalid format
         else:
             print("Invalid email format")
@@ -408,6 +400,7 @@ def signcheck():
 @app.route("/find-admin", methods=["GET", "POST"])
 def findadmin():
     "This webpage is for users who don't know who their admin is"
+    logging.info('-----------------------    FIND ADMIN PAGE    --------------------------------')
     
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
@@ -442,44 +435,34 @@ def findadmin():
                             groups.append(group)
                         # Step 3 Failed: User is in Default Group
                         if len(groups) == 1 and group == "Default Group":
-                            print("User in Default Group")
+                            logging.info("User ("+email+") in Default Group")
                             flash(email, "default_group")
-                            # Redirection from remote source (validate user input to reduce phising attempts)
-                            target = request.url
-                            if target == request.url:
-                                return redirect(target)
+                            return redirect(request.url)
                         # Step 3 Passed: User is in a group and active
                         else:
-                            print("pass step 3")
                             # Create a dictionary of admin and render it to the HTML file
                             for i in groupnameandid:  # For each group and id in the list merge the admins from that group to a dictionary
                                 # using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
                                 admindict = admindict | ad.usersInGroup(i[1], i[0])
-                            print("Email: Success")
+                            logging.info("Group Lookup using EMAIL ("+email+"): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
-                        print("Email: No Account Found")
+                        logging.info("Email ("+email+"): No Account Found")
                         flash(email, "emailNotFound")
-                        # Redirection from remote source (validate user input to reduce phising attempts)
-                        target = request.url
-                        if target == request.url:
-                            return redirect(target)
+                        return redirect(request.url)
                 # Step 1 Failed: users domain is not claimed in the UHG console
                 elif bool is None:
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
-                    print("Access Check: Unclaimed Domain")
+                    logging.info("Access Check: Unclaimed Domain")
                     return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist)
                 else:
-                    print("Invalid email format")
+                    logging.info("Invalid email format: "+message)
                     flash(message, "email")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
             else:
                 result, groupid = ad.grouplist(group)
                 if result == True:
@@ -487,29 +470,20 @@ def findadmin():
                         # using the group ID, this call runs an API call to capture all users in that group and creates a dictionary of admins to return
                         admindict = ad.usersInGroup(groupid, group)
                         if len(admindict[group]) != 0:
-                            print(admindict)
+                            logging.info("Group Lookup ("+group+"): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                         else:
-                            print("Group: No Admin For this group")
+                            logging.info("Group ("+group+"): No Admin For this group")
                             flash(group, "noAdmin")
-                            # Redirection from remote source (validate user input to reduce phising attempts)
-                            target = request.url
-                            if target == request.url:
-                                return redirect(target)
+                            return redirect(request.url)
                     else:
-                        print("Group: No Account Found")
+                        logging.info("Group ("+group+"): Not found")
                         flash(group, "groupNotFound")
-                        # Redirection from remote source (validate user input to reduce phising attempts)
-                        target = request.url
-                        if target == request.url:
-                            return redirect(target)
+                        return redirect(request.url)
                 else:
                     flash(groupid, "alert")
-                    # Redirection from remote source (validate user input to reduce phising attempts)
-                    target = request.url
-                    if target == request.url:
-                        return redirect(target)
+                    return redirect(request.url)
     return render_template("client/admin_lookup.html", grouplist=grouplist)
 # End Find Admin Page_________________________________________________________________________________________________________________________________________________
 
