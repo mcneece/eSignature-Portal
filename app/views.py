@@ -103,17 +103,34 @@ class AcrobatData(object):
 
         # If response is 404 then user email (x-email in header of API call) does not exist in UHG's Acrobat Sign
         if response.status_code == 404:
+            logging.debug("404 error in users/userByEmail: User email does not exist in UHG's Acrobat Sign")
             return None, None
         # If response is not 404 and still not 200 then print code: and message: provided by adobe to console
         elif response.status_code != 200:
             # print error to log
-            print("users/userByEmail Response Error:",
+            logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert User in UI
             return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert"
         # response was 200 (email was found) return True and user's ID
         userid = jsondata["userId"]
-        return True, userid
+
+        # Make API call using Python requests package, Adobe v6 rest API GET USER/{USERID}
+        url = app.config["REQUEST_URL_USERS"]+"/"+userid
+
+        payload = {}
+        headers = {
+            'Authorization': self.bearer_id
+        }
+        response = requests.request("GET", url, headers=headers, data=payload)
+        jsondata = json.loads(response.text)
+        status = jsondata["status"]
+        if status == "ACTIVE":
+            logging.debug("Active User")
+            return True, userid
+        else:
+            logging.debug("Inactive User")
+            return False, "User is not created in an \'ACTIVE\' status"
 
     # Step 3
     def groupCheck(self, userID):
@@ -134,7 +151,7 @@ class AcrobatData(object):
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
             # print error to log
-            print("users/userByEmail Response Error:",
+            logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to UI for user
             flash("users/userByEmail Response Error: " +
@@ -168,7 +185,7 @@ class AcrobatData(object):
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
             # Print to log
-            print("groups/"+groupID+"/users Response Error:",
+            logging.warn("groups/"+groupID+"/users Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to user in UI
             flash("groups/"+groupID+"/users Response Error: " +
