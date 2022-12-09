@@ -276,10 +276,12 @@ class AcrobatData(object):
         response = requests.request("GET", url, headers=headers, data=payload)
         jsondata = json.loads(response.text)
 
+        counter = 0
         grouplist=[]
         for each in jsondata["groupInfoList"]:
             grouplist.append(each["groupName"])
-            
+            counter += 1
+        logging.info(str(counter)+' groups in account')
         return grouplist
 # end of Request Modules===========================================================================================================
 # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
