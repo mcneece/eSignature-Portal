@@ -12,7 +12,6 @@ debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')
 infologfile = now.strftime('Logs/%b %d %Y INFO.log')
 import logging
 logging.basicConfig(filename=(debuglogfile), encoding='utf-8', level=logging.DEBUG)
-logging.basicConfig(filename=(infologfile), encoding='utf-8', level=logging.INFO)
 # Logic to delete log files after 2 days
 import os
 files = os.listdir("Logs")
@@ -105,9 +104,8 @@ class AcrobatData(object):
         if response.status_code == 404:
             logging.debug("404 error in users/userByEmail: User email does not exist in UHG's Acrobat Sign")
             return None, None
-        # If response is not 404 and still not 200 then print code: and message: provided by adobe to console
+        # If response is not 404 and still not 200 then log code: and message
         elif response.status_code != 200:
-            # print error to log
             logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert User in UI
@@ -150,7 +148,6 @@ class AcrobatData(object):
 
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
-            # print error to log
             logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to UI for user
@@ -184,7 +181,6 @@ class AcrobatData(object):
         jsondata = json.loads(response.text)
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
-            # Print to log
             logging.warn("groups/"+groupID+"/users Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to user in UI
@@ -249,12 +245,12 @@ class AcrobatData(object):
 
                     for each in temp2["memberOf"]:
                         if each["name"] == "dtm_esignature":
-                            logging.info('Used AD API, dtm_esignature found for '+email)
+                            logging.debug('Used AD API, dtm_esignature found for '+email)
                             return True
-                    logging.info('Used AD API, dtm_esiganture not found for'+email)
+                    logging.debug('Used AD API, dtm_esiganture not found for'+email)
                     return False
                 elif response.status_code == 404:
-                    logging.info('Used AD API, email ('+email+') not found in active directory')
+                    logging.debug('Used AD API, email ('+email+') not found in active directory')
                     return False
         except Exception as fail:
             logging.warn('Did not use AD API')
@@ -270,7 +266,7 @@ class AcrobatData(object):
                 target = request.url
                 if target == request.url:
                     return redirect(target)
-            print("Ran Backup CSV file")
+            logging.debug("Ran Backup CSV file")
             self.users_esignatures = df["Mail"].to_list()
 
             # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
@@ -298,7 +294,7 @@ class AcrobatData(object):
         for each in jsondata["groupInfoList"]:
             grouplist.append(each["groupName"])
             counter += 1
-        logging.info(str(counter)+' groups in account')
+        logging.debug(str(counter)+' groups in account')
         return grouplist
 # end of Request Modules===========================================================================================================
 # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -315,7 +311,6 @@ class AcrobatData(object):
         jsondata = json.loads(response.text)
 
         if response.status_code != 200:
-            # Print error to log
             logging.warn("users/userByEmail Response Error:",
                     jsondata["code"], jsondata["message"])
             # Alert UI with error
@@ -351,7 +346,7 @@ def signcheck():
     if request.method == "POST":
         userinput = request.form["useremail"]
 
-        print("Access Check", userinput)
+        logging.debug("Running Access Check", userinput)
         # Step 1: Email Validation, this check will verify if the user input is a valid email
         # Bool is True if all email validation passed otherwise false, if True message = None, if False message has error for Flask Flash
         bool, message = ad.emailvalidation(userinput)
@@ -371,12 +366,12 @@ def signcheck():
                 # Step 3 Failed: User is in Default Group
                 # User is part of default group (needs to get added to a group)
                 if len(groups) == 1 and group == "Default Group":
-                    print("User in Default Group")
+                    logging.debug("User in Default Group")
                     flash(userinput, "default_group")
                     return redirect(request.url)
                 # Step 3 Passed: User is in a group and active
                 else:
-                    print("Passed Access Check")
+                    logging.debug("Passed Access Check")
                     flash(userinput, "access_success")
                     return redirect(request.url)
             elif result is None:
@@ -384,26 +379,26 @@ def signcheck():
                 # Step 4: Check Security Group (dtm_esignature)
                 # Step 4 passed: user is in the correct security group
                 if result == True:
-                    print("Failed: Uknown Failure")
+                    logging.debug("Failed: Uknown Failure")
                     flash(userinput, "unknown")
                     return redirect(request.url)
                 # Step 4 Failed: User is not in the required security group
                 else:
-                    print("Not in AD Group")
+                    logging.debug("Not in AD Group")
                     flash(userinput, "adFail")
                     return redirect(request.url)
             else:  # Error API call GET /user/userByEmail
-                print("Error with API call GET /users/userByEmail")
+                logging.warn("Error with API call GET /users/userByEmail or error with 'Active' user status")
                 flash(userId_message, "alert")
                 return redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool is None:
-            print("Failed domain check")
+            logging.warn("Failed domain check")
             flash(message, "domain_fail")
             return redirect(request.url)
         # Step 1 Failed: User inputed email in a invalid format
         else:
-            print("Invalid email format")
+            logging.debug("Invalid email format")
             flash(message, "email")
             # Redirection from remote source (validate user input to reduce phising attempts)
             target = request.url
@@ -417,7 +412,7 @@ def signcheck():
 @app.route("/find-admin", methods=["GET", "POST"])
 def findadmin():
     "This webpage is for users who don't know who their admin is"
-    logging.info('-----------------------    FIND ADMIN PAGE    --------------------------------')
+    logging.debug('-----------------------    FIND ADMIN PAGE    --------------------------------')
     
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
@@ -442,7 +437,6 @@ def findadmin():
                     result, userId = ad.acrobatSignAccessCheck(email)
                     # Step 2 Passed: Adobe Acrobat Sign Access Check, user has an Adobe Acrobat Sign Account
                     if result == True:
-                        print("pass step 2")
                         # Step 3: Run a group check on the user that passed Adobe Acrobat Sign Access Check
                         # using the user ID, return the group (name, Id) that they are apart of
                         groupnameandid = ad.groupCheck(userId)
@@ -452,7 +446,7 @@ def findadmin():
                             groups.append(group)
                         # Step 3 Failed: User is in Default Group
                         if len(groups) == 1 and group == "Default Group":
-                            logging.info("User ("+email+") in Default Group")
+                            logging.debug("User ("+email+") in Default Group")
                             flash(email, "default_group")
                             return redirect(request.url)
                         # Step 3 Passed: User is in a group and active
@@ -461,12 +455,12 @@ def findadmin():
                             for i in groupnameandid:  # For each group and id in the list merge the admins from that group to a dictionary
                                 # using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
                                 admindict = admindict | ad.usersInGroup(i[1], i[0])
-                            logging.info("Group Lookup using EMAIL ("+email+"): Success")
+                            logging.debug("Group Lookup using EMAIL ("+email+"): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
-                        logging.info("Email ("+email+"): No Account Found")
+                        logging.debug("Email ("+email+"): No Account Found")
                         flash(email, "emailNotFound")
                         return redirect(request.url)
                 # Step 1 Failed: users domain is not claimed in the UHG console
@@ -474,10 +468,10 @@ def findadmin():
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
-                    logging.info("Access Check: Unclaimed Domain")
+                    logging.debug("Access Check: Unclaimed Domain")
                     return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist)
                 else:
-                    logging.info("Invalid email format: "+message)
+                    logging.debug("Invalid email format: "+message)
                     flash(message, "email")
                     return redirect(request.url)
             else:
@@ -487,15 +481,15 @@ def findadmin():
                         # using the group ID, this call runs an API call to capture all users in that group and creates a dictionary of admins to return
                         admindict = ad.usersInGroup(groupid, group)
                         if len(admindict[group]) != 0:
-                            logging.info("Group Lookup ("+group+"): Success")
+                            logging.debug("Group Lookup ("+group+"): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                         else:
-                            logging.info("Group ("+group+"): No Admin For this group")
+                            logging.warn("Group ("+group+"): No Admin For this group")
                             flash(group, "noAdmin")
                             return redirect(request.url)
                     else:
-                        logging.info("Group ("+group+"): Not found")
+                        logging.warn("Group ("+group+"): Not found")
                         flash(group, "groupNotFound")
                         return redirect(request.url)
                 else:
