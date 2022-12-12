@@ -99,36 +99,36 @@ class AcrobatData(object):
         response = requests.request("GET", url, headers=headers, data=payload)
         # Load JSON data into a variable
         jsondata = json.loads(response.text)
+        if response.status_code == 200: # response was 200 (email was found) return True and user's ID
+            
+            userid = jsondata["userId"] # capture user ID for active check API and to return
 
-        # If response is 404 then user email (x-email in header of API call) does not exist in UHG's Acrobat Sign
-        if response.status_code == 404:
+            #Active check API call
+            url = app.config["REQUEST_URL_USERS"]+"/"+userid
+
+            payload = {}
+            headers = {
+                'Authorization': self.bearer_id
+            }
+            response = requests.request("GET", url, headers=headers, data=payload)
+            userdata = json.loads(response.text)
+            status = userdata["status"]
+            if status == "ACTIVE":
+                logging.debug("Active User")
+                return True, userid
+            else:
+                logging.debug("Inactive User")
+                return None, "User is not created in an \'ACTIVE\' status"
+
+        elif response.status_code == 404: # response is 404 then user email (x-email in header of API call) does not exist in UHG's Acrobat Sign
             logging.debug("404 error in users/userByEmail: User email does not exist in UHG's Acrobat Sign")
             return None, None
-        # If response is not 404 and still not 200 then log code: and message
-        elif response.status_code != 200:
+        
+        else: # If response code is not 200 or 404 then log code: and error message
             logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert User in UI
             return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert"
-        # response was 200 (email was found) return True and user's ID
-        userid = jsondata["userId"]
-
-        # Make API call using Python requests package, Adobe v6 rest API GET USER/{USERID}
-        url = app.config["REQUEST_URL_USERS"]+"/"+userid
-
-        payload = {}
-        headers = {
-            'Authorization': self.bearer_id
-        }
-        response = requests.request("GET", url, headers=headers, data=payload)
-        jsondata = json.loads(response.text)
-        status = jsondata["status"]
-        if status == "ACTIVE":
-            logging.debug("Active User")
-            return True, userid
-        else:
-            logging.debug("Inactive User")
-            return False, "User is not created in an \'ACTIVE\' status"
 
     # Step 3
     def groupCheck(self, userID):
