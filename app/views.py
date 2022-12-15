@@ -9,14 +9,26 @@ from flask import render_template, request, redirect, flash
 import datetime
 now = datetime.datetime.now()
 debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')
-infologfile = now.strftime('Logs/%b %d %Y INFO.log')
 import logging
 logging.basicConfig(filename=(debuglogfile), encoding='utf-8', level=logging.DEBUG)
 # Logic to delete log files after 2 days
 import os
-files = os.listdir("Logs")
-if len(files) > 3:
-    os.remove('Logs/'+files[1])
+import time
+import glob
+
+dir_name = 'Logs/'
+
+# Get list of all files only in the given directory
+list_of_files = filter( os.path.isfile,
+                        glob.glob(dir_name + '*'))
+
+# Sort list of files based on last modification time in ascending order
+list_of_files = sorted( list_of_files,
+                        key = os.path.getmtime)
+    
+# Delete the oldest file after 15 log files have been created 
+if len(list_of_files) > 15:
+    os.remove(list_of_files[0])
 
 # Suppress only the single warning from urllib3 needed.
 # This code is required to disable SSL cert verification for AD Lookup API call
