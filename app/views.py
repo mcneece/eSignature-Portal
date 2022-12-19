@@ -517,7 +517,6 @@ def findadmin():
                                 if request.url in VALID_REDIRECT:
                                     return redirect(request.url, value="value="+group)
                         else:
-                            logging.warn("Group ("+group+"): Not found")
                             flash(group, "groupNotFound")
                             if request.url in VALID_REDIRECT:
                                 return redirect(request.url, value="value="+group)
