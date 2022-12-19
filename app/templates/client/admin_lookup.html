@@ -125,7 +125,7 @@
                 {% endwith %}
                 <div>
                   <input type="email" id="mySearch" style="display: none;" spellcheck="false"
-                    placeholder="colleague@example.com" class="w-75" data-bs-toggle="tooltip" data-bs-placement="top"
+                    placeholder="colleague@example.com" {{value}} class="w-75" data-bs-toggle="tooltip" data-bs-placement="top"
                     data-bs-custom-class="custom-tooltip" title="This top tooltip is themed via CSS variables."
                     name="email" />
                 </div>
@@ -133,7 +133,7 @@
                   Enter a colleagues email address!
                 </div>
                 <div>
-                  <input list="group-list" id="mySearch2" name="group" placeholder="Group Name" spellcheck="false" class="w-75" autocomplete="off">
+                  <input list="group-list" id="mySearch2" name="group" placeholder="Group Name" spellcheck="false" class="w-75" autocomplete="off" {{value}}>
 
                   <datalist id="group-list">
                     {% for group in grouplist %}
