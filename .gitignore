@@ -1,5 +1,7 @@
 # Project Configuratrions
 config.py
+usermanagement.config
+acrobatsign.config
 
 # Common code
 __pycache__/
@@ -17,3 +19,8 @@ venv/
 ENV/
 Logs/
 logs/
+
+#Web Configurations
+HealthCheck/index.html
+wfastcgi.py
+web.config
