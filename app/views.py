@@ -67,6 +67,7 @@ class AcrobatData(object):
         except Exception as e:
             logging.error('Error with opening claimed fomains File __init__')
         self.valid_domains = domains_df["Domain"].to_list() # Assigns list of domains to instance attribute valid_domains
+        self.bearer_id = app.confg["SECRET_KEY"] #secret key for flask project
 
     # Step 1
     def emailvalidation(self, email):
@@ -388,13 +389,13 @@ def signcheck():
                     logging.debug("User in Default Group")
                     flash(userinput, "default_group")
                     if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
                 # Step 3 Passed: User is in a group and active
                 else:
                     logging.debug("Passed Access Check")
                     flash(userinput, "access_success")
                     if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
             elif result is None:
                 result = ad.activeDirectoryCheck(userinput)
                 # Step 4: Check Security Group (dtm_esignature)
@@ -403,31 +404,31 @@ def signcheck():
                     logging.debug("Failed: Uknown Failure")
                     flash(userinput, "unknown")
                     if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
                 # Step 4 Failed: User is not in the required security group
                 else:
                     logging.debug("Not in AD Group")
                     flash(userinput, "adFail")
                     if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
             else:  # Error API call GET /user/userByEmail
                 logging.warn("Error with API call GET /users/userByEmail or error with 'Active' user status")
                 flash(userId_message, "alert")
                 if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool is None:
             logging.warn("Failed domain check")
             flash(message, "domain_fail")
             if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
         # Step 1 Failed: User inputed email in a invalid format
         else:
             logging.debug("Invalid email format")
             flash(message, "email")
             # Redirection from remote source (validate user input)
             if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+userinput)
+                                return redirect(request.url)
     # Loads Orign HTML Template for Webpage
     return render_template("client/request_access.html")
 # End Request Page____________________________________________________________________________________________________________________________________________________
@@ -472,7 +473,7 @@ def findadmin():
                             logging.debug("User ("+email+") in Default Group")
                             flash(email, "default_group")
                             if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+email)
+                                return redirect(request.url)
                         # Step 3 Passed: User is in a group and active
                         else:
                             # Create a dictionary of admin and render it to the HTML file
@@ -481,25 +482,25 @@ def findadmin():
                                 admindict = admindict | ad.usersInGroup(i[1], i[0])
                             logging.debug("Group Lookup using EMAIL ("+email+"): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
-                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist, value=email)
+                            return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
                         logging.debug("Email ("+email+"): No Account Found")
                         flash(email, "emailNotFound")
                         if request.url in VALID_REDIRECT:
-                            return redirect(request.url, value="value="+email)
+                            return redirect(request.url)
                 # Step 1 Failed: users domain is not claimed in the UHG console
                 elif bool is None:
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
                     logging.debug("Access Check: Unclaimed Domain")
-                    return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist, value=email)
+                    return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist)
                 else:
                     logging.debug("Invalid email format: "+message)
                     flash(message, "email")
                     if request.url in VALID_REDIRECT:
-                            return redirect(request.url, value="value="+email)
+                            return redirect(request.url)
             else:
                 if group in grouplist: # user provided value is validated for security
                     result, groupid = ad.grouplist(group)
@@ -515,11 +516,11 @@ def findadmin():
                                 logging.warn("Group ("+group+"): No Admin For this group")
                                 flash(group, "noAdmin")
                                 if request.url in VALID_REDIRECT:
-                                    return redirect(request.url, value="value="+group)
+                                    return redirect(request.url)
                         else:
                             flash(group, "groupNotFound")
                             if request.url in VALID_REDIRECT:
-                                return redirect(request.url, value="value="+group)
+                                return redirect(request.url)
                     else:
                         flash(groupid, "alert")
                         if request.url in VALID_REDIRECT:
