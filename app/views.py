@@ -511,7 +511,7 @@ def findadmin():
                             if len(admindict[group]) != 0:
                                 logging.debug("Group Lookup ("+group+"): Success")
                                 alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
-                                return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist, value=group)
+                                return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                             else:
                                 logging.warn("Group ("+group+"): No Admin For this group")
                                 flash(group, "noAdmin")
