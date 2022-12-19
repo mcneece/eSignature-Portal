@@ -7,7 +7,6 @@ from flask import render_template, request, redirect, flash #Project is built on
 # Setup Logging ------------------------------------
 import datetime
 import os # For File paths
-import time 
 import glob # FileName Globbing Utility
 import logging # Used for logging data to files
 
@@ -33,7 +32,6 @@ from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # read configuration files [user management]
-import sys
 from configparser import RawConfigParser
 acrobat_sign_config = 'acrobatsign.config'
 config = RawConfigParser()
@@ -55,28 +53,20 @@ class AcrobatData(object):
     "Grouping of methods that takes a user input and checks their Acrobat Sign access as well as giving them information on potential solutions if they do not pass validation"
     # Start of Request Modules========================================================================
 
-    def __init__(self, claimed_domains_file, users_esignatures_file, cached=False):
+    def __init__(self, claimed_domains_file, users_esignatures_file):
         '''create instance and load data from local files. If emails_file is not N, this would be a cache
         claimed_domains_file (str): path to local file with claimed domains'''
 
         # make file paths into instance attributes
         self.users_esignatures_file = users_esignatures_file
         self.users_esignatures = None
-        self.bearer_id = None
-        self.groups = None
 
         # using pandas to read in the csv file as a dataframe and then extract column A {domains} and put them in a list
         try:
             domains_df = pd.read_csv(claimed_domains_file)
         except Exception as e:
             logging.error('Error with opening claimed fomains File __init__')
-            flash("Error with opening "+claimed_domains_file+" "+e, "alert")
-            if request.url in VALID_REDIRECT:
-                return redirect(request.url)
         self.valid_domains = domains_df["Domain"].to_list() # Assigns list of domains to instance attribute valid_domains
-
-        # set bearer ID and URL from config file
-        self.bearer_id = app.config["SECRET_KEY"]
 
     # Step 1
     def emailvalidation(self, email):
@@ -370,8 +360,7 @@ def signcheck():
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
-                     users_esignatures_file="data_files/dtm_esignature_users.csv",
-                     cached=True)  # will use this value later on when I implement powershell script for AD lookup
+                     users_esignatures_file="data_files/dtm_esignature_users.csv")
 
     if request.method == "POST":
         userinput = request.form["useremail"]
@@ -452,8 +441,7 @@ def findadmin():
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
                      # This file stores all AD users in the dtm_esignature security group
-                     users_esignatures_file="data_files/dtm_esignature_users.csv",
-                     cached=True)  # will use this value later on when I implement powershell script for AD lookup
+                     users_esignatures_file="data_files/dtm_esignature_users.csv")
     grouplist = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown and validate the user input
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
    
