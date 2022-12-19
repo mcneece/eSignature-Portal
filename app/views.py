@@ -67,7 +67,7 @@ class AcrobatData(object):
         except Exception as e:
             logging.error('Error with opening claimed fomains File __init__')
         self.valid_domains = domains_df["Domain"].to_list() # Assigns list of domains to instance attribute valid_domains
-        self.bearer_id = app.confg["SECRET_KEY"] #secret key for flask project
+        self.bearer_id = app.config["SECRET_KEY"] #secret key for flask project
 
     # Step 1
     def emailvalidation(self, email):
