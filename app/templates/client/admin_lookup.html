@@ -13,7 +13,7 @@
     <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
   </div>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  <p>The following user {{ message }} has access to Adobe Acrobat Sign, but has not yet been assigned to a group. Please
+  <p>The following user <strong>{{ message }}</strong> has access to Adobe Acrobat Sign, but has not yet been assigned to a group. Please
     try another colleagues email or search by group.</p>
 </div>
 {% endfor %}
@@ -29,7 +29,7 @@
     <h4 style="text-transform: uppercase; position: relative;">{{ message }} Not Found</h4>
   </div>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  <p>The following user {{ message }} was not found in Adobe Acrobat Sign.</p>
+  <p>The following user <strong>{{ message }}</strong> was not found in Adobe Acrobat Sign.</p>
 </div>
 {% endfor %}
 {% endif %}
@@ -44,7 +44,7 @@
     <h4 style="text-transform: uppercase; position: relative;">{{ message }} Not Found</h4>
   </div>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  <p>The following group {{ message }} was not found in Adobe Acrobat Sign.</p>
+  <p>The following group <strong>{{ message }}</strong> was not found in Adobe Acrobat Sign.</p>
 </div>
 {% endfor %}
 {% endif %}
@@ -59,7 +59,7 @@
     <h4 style="text-transform: uppercase; position: relative;">{{ message }} Missing Admin</h4>
   </div>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  <p>The following group {{ message }} was found in Adobe Acrobat Sign, but do not have an admin assigned.</p>
+  <p>The following group <strong>{{ message }}</strong> was found in Adobe Acrobat Sign, but does not have an admin assigned.</p>
   <hr>
   <p>Please open a ticket with the eSignature Support Team</p>
 </div>
@@ -89,10 +89,10 @@
       <div class="card-body" align="left">
         <h5>Find Group Admin</h5>
         <p class="card-text">Group Admins in Adobe Acrobat Sign are individuals who oversee a specific group of users.
-          Using this tool you can find your group admin and contact them to request access to their group, or to discuss
+          Using this tool, you can find your group admin and contact them to request access to their group, or to discuss
           changes that need to be made to the overall group settings.</p>
         <hr>
-        <p>You can find an admin by entering the name of an existing group, or by entering an active users email. If you
+        <p>You can find an admin by entering the name of an existing group, or by entering an active user's email. If you
           choose to search by email this will return that users' admin.</p>
         <hr>
         <form action="/find-admin" method="POST">

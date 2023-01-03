@@ -27,7 +27,7 @@
         <h4 style="text-transform: uppercase; position: relative;">{{ message }} Has Access</h4>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <p>The following user {{ message }} has access to Adobe Acrobat Sign!</p>
+    <p>The following user <strong>{{ message }}</strong> has access to Adobe Acrobat Sign!</p>
     <hr>
     <p>Login to <a target="_blank" href="https://unitedhg.na3.adobesign.com/account/homeJS">Adobe Acrobat Sign</a>!</p>
 </div>
@@ -44,10 +44,9 @@
         <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <p>The following user {{ message }} has access to Adobe Acrobat Sign, but by default all users originally
-        provisioned into Acrobat Sign are assigned to a group with very limited functionality. In access core
-        functionality {{ message }} will need to reach out to
-        their group admin for group assignment.</p>
+    <p>The following user <strong>{{ message }}</strong> has access to Adobe Acrobat Sign, but is missing group assignment.
+    By default, all accounts created in Acrobat Sign will not have the ability to send. You will need to contact your group 
+    admin to add you to an appropriate group with send access.</p>
     <hr>
     <p>Don't know your group admin?... No worries use our <a href="/find-admin">Find My Admin tool</a></p>
 </div>
@@ -90,14 +89,14 @@
     <h5>After Submission:</h5>
     <ul>
         <li>Wait for your request to be approved by your manager and the eSignature Support Team.</li>
-        <li>Once your reqest is approved the system will automatically create an account in Adobe Acrobat Sign. This
+        <li>Once your request is approved the system will automatically create an account in Adobe Acrobat Sign. This
             automated sync process can take up to three hours.</li>
     </ul>
     <hr class="mb-2">
     <h5>How to Verify:</h5>
     <p>To verify next steps in the request process, submit your email again using this tool. If you get this same
         alert that means one of the following: Your request has not yet been
-        approved or was denied, the automatted sync tool is still running.</p>
+        approved or may have been denied by your manager, or the automated sync tool is still running (this can take up to 3 hours after your request has been approved).</p>
 </div>
 {% endfor %}
 {% endif %}
