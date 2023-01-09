@@ -116,7 +116,11 @@ class AcrobatData(object):
             'x-email': userinput, # x-email retrieves user data for just that users
             'Authorization': "Bearer " + access_token
         }
-        response = requests.get(url, headers=headers, data=payload)
+        try:
+            response = requests.get(url, headers=headers, data=payload, timeout=5)
+        except requests.exceptions.Timeout:
+            logging.warn("The following request timed-out "+url)
+            return False, "The following request timed-out"+url
         # Load JSON data into a variable
         jsondata = json.loads(response.text)
         if response.status_code == 200: # response was 200 (email was found) return True and user's ID
@@ -148,7 +152,7 @@ class AcrobatData(object):
             logging.warn("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert User in UI
-            return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"], "alert"
+            return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
 
     # Step 3
     def groupCheck(self, userID):
@@ -161,8 +165,13 @@ class AcrobatData(object):
         headers = {
             'Authorization': "Bearer " + access_token
         }
-
-        response = requests.get(url, headers=headers, data=payload)
+        try:
+            response = requests.get(url, headers=headers, data=payload, timeout=5)
+        except requests.exceptions.Timeout:
+            logging.warn("The following URL timed-out "+url)
+            flash("The following URL timed-out "+url, "alert")
+            if request.url in VALID_REDIRECT:
+                return redirect(request.url)
         # Load JSON data into a variable
         jsondata = json.loads(response.text)
 
@@ -193,8 +202,14 @@ class AcrobatData(object):
         headers = {
             'Authorization': "Bearer " + access_token
         }
-
-        response = requests.get(url, headers=headers, data=payload)
+        try:
+            response = requests.get(url, headers=headers, data=payload, timeout=5)
+        except requests.exceptions.Timeout:
+            logging.warn("The following URL timed-out "+url)
+            flash("The following URL timed-out "+url, "alert")
+            if request.url in VALID_REDIRECT:
+                return redirect(request.url)
+            
         jsondata = json.loads(response.text)
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
@@ -242,7 +257,7 @@ class AcrobatData(object):
             'Content-Type': 'application/json'
         }
         try:
-            response = requests.post(url, headers=headers, data=payload, verify=False)
+            response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5)
             jsondata = json.loads(response.text)
 
             if response.status_code == 200:
@@ -258,7 +273,7 @@ class AcrobatData(object):
                     'Authorization': 'Bearer '+jsondata["access_token"]
                 }
 
-                response = requests.get(url, headers=headers, data=payload, verify=False)
+                response = requests.get(url, headers=headers, data=payload, verify=False, timeout=5)
 
                 jsondata = json.loads(response.text)
 
@@ -275,13 +290,15 @@ class AcrobatData(object):
                 elif response.status_code == 404:
                     logging.info('Used AD API, email ('+email+') not found in active directory')
                     return False
+
         except Exception as fail:
-            logging.warn('Did not use AD API')
+            logging.warn('Did not use AD API because')
         
         # If API call fails run backup CSV file
         # Backup CSV file AD Lookup
             try:
                 df = pd.read_csv(self.users_esignatures_file)
+            
             except Exception as e:
                 logging.warn("Error reading users Active Directory (dtm_esignature) file")
                 flash("Error reading users Active Directory (dtm_esignature) file", "alert")
@@ -307,7 +324,15 @@ class AcrobatData(object):
         headers = {
             'Authorization': "Bearer " + access_token
         }
-        response = requests.get(url, headers=headers, data=payload)
+        try:
+            response = requests.get(url, headers=headers, data=payload, timeout=5)
+       
+        except requests.exceptions.Timeout:
+            logging.warn("The following URL timed-out "+url)
+            flash("The following URL timed-out "+url, "alert")
+            if request.url in VALID_REDIRECT:
+                return redirect(request.url)
+
         jsondata = json.loads(response.text)
 
         counter = 0
@@ -328,7 +353,11 @@ class AcrobatData(object):
         headers = {
             'Authorization': "Bearer " + access_token
             }
-        response = requests.get(url, headers=headers, data=payload)
+        try:
+            response = requests.get(url, headers=headers, data=payload, timeout=5)
+        except requests.exceptions.Timeout:
+            logging.warn("The following URL timed-out "+url)
+            return False, "The following URL timed-out "+url
         jsondata = json.loads(response.text)
 
         if response.status_code != 200:
