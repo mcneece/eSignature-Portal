@@ -456,7 +456,7 @@ def signcheck():
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
-            #Update the month usage count
+            #Update the year usage count
             count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
             #Write changes back to file
             with open('acrobatsign.config', 'w') as conf:
@@ -467,7 +467,7 @@ def signcheck():
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
-            #Update the month usage count
+            #Update the YEAR usage count
             count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
             #Write changes back to file
             with open('acrobatsign.config', 'w') as conf:
@@ -555,6 +555,8 @@ def findadmin():
     grouplist = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown and validate the user input
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
     
+    config_object = ConfigParser()
+    config_object.read("acrobatsign.config")
     global FINDADMINUSAGECOUNT_MONTH #Declare the global to use for Year count
     global FINDADMINUSAGECOUNT_YEAR # Declare the gloval to user for Month count
 
@@ -568,14 +570,47 @@ def findadmin():
         yesterdaymonth = yesterday.strftime('%b')
         if todaymonth != yesterdaymonth:
             FINDADMINUSAGECOUNT_MONTH = 0
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["admin_month"] = str(FINDADMINUSAGECOUNT_MONTH)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         else:
             FINDADMINUSAGECOUNT_MONTH += 1
             logging.info("Current FIND ADMIN API Usage for the Month of " + todaymonth + ": is " + str(FINDADMINUSAGECOUNT_MONTH))
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["admin_month"] = str(FINDADMINUSAGECOUNT_MONTH)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         if todayyear != yesterdayyear:
             FINDADMINUSAGECOUNT_YEAR = 0
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["admin_year"] = str(FINDADMINUSAGECOUNT_YEAR)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         else:
             FINDADMINUSAGECOUNT_YEAR += 1
             logging.info("Current FIND ADMIN API Usage YTD: " + str(FINDADMINUSAGECOUNT_YEAR))
+
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["admin_year"] = str(FINDADMINUSAGECOUNT_YEAR)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
 
         email = str(request.form["email"])
         group = str(request.form["group"])
