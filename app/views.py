@@ -6,13 +6,21 @@ from flask import render_template, request, redirect, flash #Project is built on
 
 # Setup Logging ------------------------------------
 import datetime
+from datetime import date
+from datetime import timedelta
 import os # For File paths
 import glob # FileName Globbing Utility
 import logging # Used for logging data to files
 
+from app import FINDADMINUSAGECOUNT_MONTH
+from app import FINDADMINUSAGECOUNT_YEAR
+from app import ACCESSUSAGECOUNT_MONTH
+from app import ACCESSUSAGECOUNT_YEAR
+
+
 now = datetime.datetime.now() # gets current date and time
 debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log') # Creates debug file
-logging.basicConfig(level =logging.DEBUG, filename=(debuglogfile), encoding='utf-8', filemode='a',
+logging.basicConfig(level =logging.INFO, filename=(debuglogfile), encoding='utf-8', filemode='a',
                     format="%(asctime)s - %(levelname)s - %(message)s")
 
 dir_name = 'Logs/' #Log file directory
@@ -76,7 +84,7 @@ class AcrobatData(object):
 
         # If email = blank
         if email == "":
-            logging.warn("No email given")
+            logging.warn("def emailvalidation: No email given")
             return False, "No email given!"
 
         # Split username and domainname
@@ -85,7 +93,7 @@ class AcrobatData(object):
 
         # how many dots in domain name?
         if domainname.count(".") != 1:
-            logging.warn("domain-name must have exactly one '.'!")
+            logging.warn("def emailvalidation: domain-name must have exactly one '.'!")
             return False, "domain-name must have exactly one '.'!"
 
         # split into subdomain and top-level domain (TLD)
@@ -93,7 +101,7 @@ class AcrobatData(object):
 
         # is top-level domain (TLD) legit?
         if topleveldomain not in ["com", "edu", "org", "gov", "net"]:
-            logging.warn("domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net")
+            logging.warn("def emailvalidation: domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net")
             return False, "domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net"
 
         # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
@@ -101,7 +109,7 @@ class AcrobatData(object):
             logging.debug("Passed email validation")
             return True, None
         else:
-            logging.warn(domainname + " not a claimed domain in UHG Adobe console")
+            logging.warn("def emailvalidation: " + domainname + " is not a claimed domain in UHG Adobe console")
             return None, domainname
 
     # Step 2
@@ -119,7 +127,7 @@ class AcrobatData(object):
         try:
             response = requests.get(url, headers=headers, data=payload, timeout=5)
         except requests.exceptions.Timeout:
-            logging.warn("The following request timed-out "+url)
+            logging.warn("def actobatSignAccessCheck: The following request timed-out "+url)
             return False, "The following request timed-out"+url
         # Load JSON data into a variable
         jsondata = json.loads(response.text)
@@ -134,25 +142,32 @@ class AcrobatData(object):
             headers = {
                 'Authorization': "Bearer " + access_token
             }
-            response = requests.get(url, headers=headers, data=payload)
+            try:
+                response = requests.get(url, headers=headers, data=payload, timeout=5)
+            except requests.exceptions.Timeout:
+                logging.error("def actobatSignAccessCheck: The following request timed-out "+url)
+                return False, "The following request timed-out"+url
+            if response.status_code == 404:
+                logging.error("def actobatSignAccessCheck: Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API")
+                return False, "Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API"
             userdata = json.loads(response.text)
             status = userdata["status"]
             if status == "ACTIVE":
-                logging.debug("Active User")
+                logging.info("def acrobatSignAccessCheck: " + userinput + "= Active User")
                 return True, userid
             else:
-                logging.debug("Inactive User")
+                logging.info("def acrobatSignAccessCheck: " + userinput + "Inactive User")
                 return None, "User is not created in an \'ACTIVE\' status"
 
         elif response.status_code == 404: # response is 404 then user email (x-email in header of API call) does not exist in UHG's Acrobat Sign
-            logging.debug("404 error in users/userByEmail: User email does not exist in UHG's Acrobat Sign")
+            logging.warn("404 error in users/userByEmail: " + userinput + " does not exist in UHG's Acrobat Sign")
             return None, None
         
         else: # If response code is not 200 or 404 then log code: and error message
-            logging.warn("users/userByEmail Response Error:",
+            logging.error("users/userByEmail Response Error:",
                   jsondata["code"], jsondata["message"])
             # Alert User in UI
-            return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
+            return False, "users/userByEmail Response Error: "+ str(jsondata["code"]) + ": " + jsondata["message"]
 
     # Step 3
     def groupCheck(self, userID):
@@ -168,8 +183,8 @@ class AcrobatData(object):
         try:
             response = requests.get(url, headers=headers, data=payload, timeout=5)
         except requests.exceptions.Timeout:
-            logging.warn("The following URL timed-out "+url)
-            flash("The following URL timed-out "+url, "alert")
+            logging.warn("def groupCheck: The following URL timed-out " + url)
+            flash("The following URL timed-out " + url, "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
         # Load JSON data into a variable
@@ -177,11 +192,11 @@ class AcrobatData(object):
 
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
-            logging.warn("users/userByEmail Response Error:",
-                  jsondata["code"], jsondata["message"])
+            logging.warn("def groupCheck: /group Response Error:" + 
+                  str(jsondata["code"]) + jsondata["message"])
             # Flash error message to UI for user
-            flash("users/userByEmail Response Error: " +
-                  jsondata["code"]+": "+jsondata["message"], "alert")
+            flash("/group Response Error: " +
+                  str(jsondata["code"]) + ": " + jsondata["message"], "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
 
@@ -205,19 +220,19 @@ class AcrobatData(object):
         try:
             response = requests.get(url, headers=headers, data=payload, timeout=5)
         except requests.exceptions.Timeout:
-            logging.warn("The following URL timed-out "+url)
-            flash("The following URL timed-out "+url, "alert")
+            logging.warn("def usersInGroup: The following URL timed-out " + url)
+            flash("The following URL timed-out " + url , "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
             
         jsondata = json.loads(response.text)
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
-            logging.warn("groups/"+groupID+"/users Response Error:",
+            logging.warn("def usersInGroup: groups/" + str(groupID) + "/users Response Error:",
                   jsondata["code"], jsondata["message"])
             # Flash error message to user in UI
-            flash("groups/"+groupID+"/users Response Error: " +
-                  jsondata["code"]+": "+jsondata["message"], "alert")
+            flash("groups/" + groupID + "/users Response Error: " +
+                  str(jsondata["code"]) + ": " + jsondata["message"] , "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
 
@@ -283,16 +298,16 @@ class AcrobatData(object):
 
                     for each in temp2["memberOf"]:
                         if each["name"] == "dtm_esignature":
-                            logging.info('Used AD API, dtm_esignature found for '+email)
+                            logging.info('def activeDirectoryCheck: Used AD API, dtm_esignature found for ' + email)
                             return True
-                    logging.info('Used AD API, dtm_esiganture not found for'+email)
+                    logging.info('Used AD API, dtm_esiganture not found for' + email)
                     return False
                 elif response.status_code == 404:
-                    logging.info('Used AD API, email ('+email+') not found in active directory')
+                    logging.info('def activeDirectoryCheck: Used AD API, email (' + email + ') not found in active directory')
                     return False
 
         except Exception as fail:
-            logging.warn('Did not use AD API because')
+            logging.warn('def activeDirectoryCheck Did not use AD API')
         
         # If API call fails run backup CSV file
         # Backup CSV file AD Lookup
@@ -309,10 +324,10 @@ class AcrobatData(object):
 
             # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
             if email in self.users_esignatures:
-                logging.debug('Used backup CSV file, Pass')
+                logging.warn('Used backup CSV file, Pass')
                 return True
             else:
-                logging.debug('Used backup CSV file, Fail')
+                logging.warn('Used backup CSV file, Fail')
                 return False
 
     def creategrouplist(self):
@@ -328,11 +343,17 @@ class AcrobatData(object):
             response = requests.get(url, headers=headers, data=payload, timeout=5)
        
         except requests.exceptions.Timeout:
-            logging.warn("The following URL timed-out "+url)
-            flash("The following URL timed-out "+url, "alert")
+            logging.warn("def creategrouplist: The following URL timed-out " + url)
+            flash("def creategrouplist: The following URL timed-out " + url , "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
 
+        if response.status_code != 200:
+            logging.warn("def grouplist: " + host + endpoint + "/groups Response Error:",
+                    str(jsondata["code"]) + jsondata["message"])
+            # Alert UI with error
+            return False, host + endpoint + "/groups Response Error: " + jsondata["code"] + ": " + jsondata["message"]
+        
         jsondata = json.loads(response.text)
 
         counter = 0
@@ -340,8 +361,9 @@ class AcrobatData(object):
         for each in jsondata["groupInfoList"]:
             grouplist.append(each["groupName"])
             counter += 1
-        logging.debug(str(counter)+' groups in account')
         return grouplist
+
+
 # end of Request Modules===========================================================================================================
 # Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -356,15 +378,15 @@ class AcrobatData(object):
         try:
             response = requests.get(url, headers=headers, data=payload, timeout=5)
         except requests.exceptions.Timeout:
-            logging.warn("The following URL timed-out "+url)
-            return False, "The following URL timed-out "+url
+            logging.warn("The following URL timed-out " + url)
+            return False, "The following URL timed-out " + url
         jsondata = json.loads(response.text)
 
         if response.status_code != 200:
-            logging.warn("users/userByEmail Response Error:",
+            logging.warn("def grouplist: " + host + endpoint + "/groups Response Error:",
                     jsondata["code"], jsondata["message"])
             # Alert UI with error
-            return False, "users/userByEmail Response Error: "+jsondata["code"]+": "+jsondata["message"]
+            return False, host + endpoint + "/groups Response Error: " + str(jsondata["code"]) + ": " + jsondata["message"]
 
         groupID = ""
 
@@ -391,8 +413,28 @@ def signcheck():
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
-
+    global ACCESSUSAGECOUNT_MONTH
+    global ACCESSUSAGECOUNT_YEAR
     if request.method == "POST":
+        
+        # The following code with for logging ACCESSS
+        today = date.today()
+        yesterday = today - timedelta(days = 1)
+        todayyear = today.strftime('%Y')
+        yesterdayyear = yesterday.strftime('%Y')
+        todaymonth = today.strftime('%b')
+        yesterdaymonth = yesterday.strftime('%b')
+        if todaymonth != yesterdaymonth:
+            ACCESSUSAGECOUNT_MONTH = 0
+        else:
+            ACCESSUSAGECOUNT_MONTH += 1 # Access check used
+            logging.info("Current REQUEST ACCESS API Usage for the Month of " + todaymonth + ": is " + str(ACCESSUSAGECOUNT_MONTH))
+        if todayyear != yesterdayyear:
+            ACCESSUSAGECOUNT_YEAR = 0
+        else:
+            ACCESSUSAGECOUNT_YEAR += 1 # Access check used
+            logging.info("Current REQUEST ACCESS API Usage YTD: " + str(ACCESSUSAGECOUNT_YEAR))
+        
         userinput = request.form["useremail"]
 
         logging.debug("Running Access Check", userinput)
@@ -415,13 +457,13 @@ def signcheck():
                 # Step 3 Failed: User is in Default Group
                 # User is part of default group (needs to get added to a group)
                 if len(groups) == 1 and group == "Default Group":
-                    logging.debug("User in Default Group")
+                    logging.warn("User " + userinput + " is in the Default Group")
                     flash(userinput, "default_group")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
                 # Step 3 Passed: User is in a group and active
                 else:
-                    logging.debug("Passed Access Check")
+                    logging.debug(userinput + ": Passed Access Check!")
                     flash(userinput, "access_success")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
@@ -430,30 +472,30 @@ def signcheck():
                 # Step 4: Check Security Group (dtm_esignature)
                 # Step 4 passed: user is in the correct security group
                 if result == True:
-                    logging.debug("Failed: Uknown Failure")
+                    logging.error(userinput + " Failed lookup: Uknown Failure (Probably dual entitled)")
                     flash(userinput, "unknown")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
                 # Step 4 Failed: User is not in the required security group
                 else:
-                    logging.debug("Not in AD Group")
+                    logging.warn(userinput + " is not in AD Group")
                     flash(userinput, "adFail")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
             else:  # Error API call GET /user/userByEmail
-                logging.warn("Error with API call GET /users/userByEmail or error with 'Active' user status")
+                logging.warn(userinput + "had an error with the API call GET /users/userByEmail OR is not an 'Active' user in Adobe Acrobat Sign")
                 flash(userId_message, "alert")
                 if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool is None:
-            logging.warn("Failed domain check")
+            logging.warn(userinput + "failed domain check")
             flash(message, "domain_fail")
             if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
         # Step 1 Failed: User inputed email in a invalid format
         else:
-            logging.debug("Invalid email format")
+            logging.debug(userinput + "Invalid email format")
             flash(message, "email")
             # Redirection from remote source (validate user input)
             if request.url in VALID_REDIRECT:
@@ -467,15 +509,36 @@ def signcheck():
 def findadmin():
     "This webpage is for users who don't know who their admin is"
     logging.debug('-----------------------    FIND ADMIN PAGE    --------------------------------')
-    
+
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
                      # This file stores all AD users in the dtm_esignature security group
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
     grouplist = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown and validate the user input
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
-   
+    
+    global FINDADMINUSAGECOUNT_MONTH #Declare the global to use for Year count
+    global FINDADMINUSAGECOUNT_YEAR # Declare the gloval to user for Month count
+
     if request.method == "POST":
+        
+        today = date.today() # Get todays date
+        yesterday = today - timedelta(days = 1) # Get yesterdays date
+        todayyear = today.strftime('%Y') # Get the year for today
+        yesterdayyear = yesterday.strftime('%Y') # Get the year for yesterday
+        todaymonth = today.strftime('%b')
+        yesterdaymonth = yesterday.strftime('%b')
+        if todaymonth != yesterdaymonth:
+            FINDADMINUSAGECOUNT_MONTH = 0
+        else:
+            FINDADMINUSAGECOUNT_MONTH += 1
+            logging.info("Current FIND ADMIN API Usage for the Month of " + todaymonth + ": is " + str(FINDADMINUSAGECOUNT_MONTH))
+        if todayyear != yesterdayyear:
+            FINDADMINUSAGECOUNT_YEAR = 0
+        else:
+            FINDADMINUSAGECOUNT_YEAR += 1
+            logging.info("Current FIND ADMIN API Usage YTD: " + str(FINDADMINUSAGECOUNT_YEAR))
+
         email = str(request.form["email"])
         group = str(request.form["group"])
         # If the user input something
@@ -499,7 +562,7 @@ def findadmin():
                             groups.append(group)
                         # Step 3 Failed: User is in Default Group
                         if len(groups) == 1 and group == "Default Group":
-                            logging.debug("User ("+email+") in Default Group")
+                            logging.warn("User (" + email + ") in Default Group")
                             flash(email, "default_group")
                             if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
@@ -509,12 +572,12 @@ def findadmin():
                             for i in groupnameandid:  # For each group and id in the list merge the admins from that group to a dictionary
                                 # using the group ID, this call runs an API call to capture all users in that group and creates a list of admins to return
                                 admindict = admindict | ad.usersInGroup(i[1], i[0])
-                            logging.debug("Group Lookup using EMAIL ("+email+"): Success")
+                            logging.info("Group Lookup using EMAIL (" + email + "): Success")
                             alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>Please contact one of the following admins to get added to your group:</p><ul>"
                             return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                     # Step 1 Failed: User does not have an Acrobat Sign Account
                     else:
-                        logging.debug("Email ("+email+"): No Account Found")
+                        logging.info("Email (" + email + "): No Account Found")
                         flash(email, "emailNotFound")
                         if request.url in VALID_REDIRECT:
                             return redirect(request.url)
@@ -523,10 +586,10 @@ def findadmin():
                     alert = "<div align=\"left\" class=\"alert alert-danger alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Danger:\"><use xlink:href=\"#exclamation-triangle-fill\"/></svg><h4 style=\"display:inline\" class=\"alert-heading pt-2\">Unclaimed Domain</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p>The following domain <strong>" + \
                         message+"</strong> is not a claimed domain in UHG's Adobe Console.</p><p class=\"mb-1\">Currently only users with claimed domains can be provisioned in Adobe Acrobat Sign, because of this <strong>" + \
                             email+"</strong> does not have an active account in Adobe Acrobat Sign.</p></div>"
-                    logging.debug("Access Check: Unclaimed Domain")
+                    logging.warn(email + "failed due to Unclaimed Domain")
                     return render_template("client/admin_lookup.html", alert=alert, grouplist=grouplist)
                 else:
-                    logging.debug("Invalid email format: "+message)
+                    logging.warn(email + "Invalid email format: " + message)
                     flash(message, "email")
                     if request.url in VALID_REDIRECT:
                             return redirect(request.url)
@@ -538,20 +601,22 @@ def findadmin():
                             # using the group ID, this call runs an API call to capture all users in that group and creates a dictionary of admins to return
                             admindict = ad.usersInGroup(groupid, group)
                             if len(admindict[group]) != 0:
-                                logging.debug("Group Lookup ("+group+"): Success")
+                                logging.info("Group Lookup (" + group + "): Success")
                                 alert = "<div align=\"left\" class=\"alert alert-success alert-dismissible fade show mx-3\" role=\"alert\"><div><svg style=\"display:inline\" class=\"bi flex-shrink-0 me-2 mb-2\" width=\"24\" height=\"24\" role=\"img\" aria-label=\"Success:\"><use xlink:href=\"#check-circle-fill\" /></svg><h4 style=\"display:inline\">Admin's Found!</h4></div><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button><p class=\"ms-4\">Please contact one of the following admins to get added to your group, or make changes to your group settings.</p><ul>"
                                 return render_template("client/admin_lookup.html", alert=alert, admindict=admindict, grouplist=grouplist)
                             else:
-                                logging.warn("Group ("+group+"): No Admin For this group")
+                                logging.warn("Group (" + group + "): No Admin For this group")
                                 flash(group, "noAdmin")
                                 if request.url in VALID_REDIRECT:
                                     return redirect(request.url)
                         else:
                             flash(group, "groupNotFound")
+                            logging.warn(group + ": group was not found")
                             if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
                     else:
                         flash(groupid, "alert")
+                        logging.error(groupid + ": error")
                         if request.url in VALID_REDIRECT:
                             return redirect(request.url)
     return render_template("client/admin_lookup.html", grouplist=grouplist)
