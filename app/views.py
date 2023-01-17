@@ -3,7 +3,7 @@ import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
 from app import app  # for running Flask app
 from flask import render_template, request, redirect, flash #Project is built on Flask APP
-
+from configparser import ConfigParser
 # Setup Logging ------------------------------------
 import datetime
 from datetime import date
@@ -413,6 +413,10 @@ def signcheck():
     # make a instance (object) of the class and use instance methods from now on
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
+    
+    #Read config file for writting globals to config
+    config_object = ConfigParser()
+    config_object.read("acrobatsign.config")
     global ACCESSUSAGECOUNT_MONTH
     global ACCESSUSAGECOUNT_YEAR
     if request.method == "POST":
@@ -426,14 +430,48 @@ def signcheck():
         yesterdaymonth = yesterday.strftime('%b')
         if todaymonth != yesterdaymonth:
             ACCESSUSAGECOUNT_MONTH = 0
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["request_month"] = str(ACCESSUSAGECOUNT_MONTH)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         else:
             ACCESSUSAGECOUNT_MONTH += 1 # Access check used
             logging.info("Current REQUEST ACCESS API Usage for the Month of " + todaymonth + ": is " + str(ACCESSUSAGECOUNT_MONTH))
+
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["request_month"] = str(ACCESSUSAGECOUNT_MONTH)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
+        
         if todayyear != yesterdayyear:
             ACCESSUSAGECOUNT_YEAR = 0
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         else:
             ACCESSUSAGECOUNT_YEAR += 1 # Access check used
             logging.info("Current REQUEST ACCESS API Usage YTD: " + str(ACCESSUSAGECOUNT_YEAR))
+            #Get the USAGE COUNT from config
+            count = config_object["usage_count"]
+
+            #Update the month usage count
+            count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
+            #Write changes back to file
+            with open('acrobatsign.config', 'w') as conf:
+                config_object.write(conf)
         
         userinput = request.form["useremail"]
 
