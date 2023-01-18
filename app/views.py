@@ -416,7 +416,7 @@ def signcheck():
     
     #Read config file for writting globals to config
     config_object = ConfigParser()
-    config_object.read("acrobatsign.config")
+    config_object.read("count.config")
     global ACCESSUSAGECOUNT_MONTH
     global ACCESSUSAGECOUNT_YEAR
     if request.method == "POST":
@@ -436,7 +436,7 @@ def signcheck():
             #Update the month usage count
             count["request_month"] = str(ACCESSUSAGECOUNT_MONTH)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         else:
             ACCESSUSAGECOUNT_MONTH += 1 # Access check used
@@ -448,7 +448,7 @@ def signcheck():
             #Update the month usage count
             count["request_month"] = str(ACCESSUSAGECOUNT_MONTH)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         
         if todayyear != yesterdayyear:
@@ -459,7 +459,7 @@ def signcheck():
             #Update the year usage count
             count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         else:
             ACCESSUSAGECOUNT_YEAR += 1 # Access check used
@@ -470,7 +470,7 @@ def signcheck():
             #Update the YEAR usage count
             count["request_year"] = str(ACCESSUSAGECOUNT_YEAR)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         
         userinput = request.form["useremail"]
@@ -556,7 +556,7 @@ def findadmin():
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
     
     config_object = ConfigParser()
-    config_object.read("acrobatsign.config")
+    config_object.read("count.config")
     global FINDADMINUSAGECOUNT_MONTH #Declare the global to use for Year count
     global FINDADMINUSAGECOUNT_YEAR # Declare the gloval to user for Month count
 
@@ -576,7 +576,7 @@ def findadmin():
             #Update the month usage count
             count["admin_month"] = str(FINDADMINUSAGECOUNT_MONTH)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         else:
             FINDADMINUSAGECOUNT_MONTH += 1
@@ -587,7 +587,7 @@ def findadmin():
             #Update the month usage count
             count["admin_month"] = str(FINDADMINUSAGECOUNT_MONTH)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         if todayyear != yesterdayyear:
             FINDADMINUSAGECOUNT_YEAR = 0
@@ -597,7 +597,7 @@ def findadmin():
             #Update the month usage count
             count["admin_year"] = str(FINDADMINUSAGECOUNT_YEAR)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
         else:
             FINDADMINUSAGECOUNT_YEAR += 1
@@ -609,7 +609,7 @@ def findadmin():
             #Update the month usage count
             count["admin_year"] = str(FINDADMINUSAGECOUNT_YEAR)
             #Write changes back to file
-            with open('acrobatsign.config', 'w') as conf:
+            with open('count.config', 'w') as conf:
                 config_object.write(conf)
 
         email = str(request.form["email"])

@@ -24,3 +24,4 @@ logs/
 HealthCheck/index.html
 wfastcgi.py
 web.config
+count.config

@@ -1,8 +1,10 @@
 from distutils.command.config import config
 from configparser import RawConfigParser
 acrobat_sign_config = 'acrobatsign.config'
+count_config = 'count.config'
 config = RawConfigParser()
 config.read(acrobat_sign_config)
+config.read(count_config)
 
 from flask import Flask
 
