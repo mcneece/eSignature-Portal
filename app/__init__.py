@@ -19,7 +19,7 @@ else:
 
 ACCESSUSAGECOUNT_YEAR = int(config.get("usage_count", "request_year")) # This will be logged to see how often the REQUEST ACCESS API is used every year
 FINDADMINUSAGECOUNT_YEAR = int(config.get("usage_count", "admin_year")) # This will be logged to see how often the FIND AMIN API is used every year
-ACCESSUSAGECOUNT_MONTH = int(config.get("usage_count", "request_year")) # This will be logged to see how often the REQUEST ACCESS API is used every month
+ACCESSUSAGECOUNT_MONTH = int(config.get("usage_count", "request_month")) # This will be logged to see how often the REQUEST ACCESS API is used every month
 FINDADMINUSAGECOUNT_MONTH = int(config.get("usage_count", "admin_month")) # This will be logged to see how often the FIND AMIN API is used every month
 
 from app import views
