@@ -429,7 +429,7 @@ def signcheck():
         todaymonth = today.strftime('%b')
         yesterdaymonth = yesterday.strftime('%b')
         if todaymonth != yesterdaymonth:
-            ACCESSUSAGECOUNT_MONTH = 0
+            ACCESSUSAGECOUNT_MONTH = 1
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
@@ -452,7 +452,7 @@ def signcheck():
                 config_object.write(conf)
         
         if todayyear != yesterdayyear:
-            ACCESSUSAGECOUNT_YEAR = 0
+            ACCESSUSAGECOUNT_YEAR = 1
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
@@ -569,7 +569,7 @@ def findadmin():
         todaymonth = today.strftime('%b')
         yesterdaymonth = yesterday.strftime('%b')
         if todaymonth != yesterdaymonth:
-            FINDADMINUSAGECOUNT_MONTH = 0
+            FINDADMINUSAGECOUNT_MONTH = 1
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
@@ -590,7 +590,7 @@ def findadmin():
             with open('count.ini', 'w') as conf:
                 config_object.write(conf)
         if todayyear != yesterdayyear:
-            FINDADMINUSAGECOUNT_YEAR = 0
+            FINDADMINUSAGECOUNT_YEAR = 1
             #Get the USAGE COUNT from config
             count = config_object["usage_count"]
 
