@@ -86,7 +86,9 @@ class AcrobatData(object):
         if email == "":
             logging.warn("def emailvalidation: No email given")
             return False, "No email given!"
-
+        
+        email = email.lower() # makes email all lower case to ensure that there is issues matching due to case sensativity.
+        
         # Split username and domainname
         l = email.split("@")
         username, domainname = l[0], l[1]
@@ -105,7 +107,10 @@ class AcrobatData(object):
             return False, "domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net"
 
         # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
-        if domainname in self.valid_domains:
+        domainlist = []
+        for x in self.valid_domains:
+               domainlist.append(x.lower())
+        if domainname in domainlist:
             logging.debug("Passed email validation")
             return True, None
         else:
