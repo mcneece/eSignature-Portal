@@ -148,8 +148,8 @@ class AcrobatData(object):
                 logging.error("def actobatSignAccessCheck: The following request timed-out "+url)
                 return False, "The following request timed-out"+url
             if response.status_code == 404:
-                logging.error("def actobatSignAccessCheck: Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API")
-                return False, "Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API"
+                logging.error("def actobatSignAccessCheck: " + userinput + " is in a PENDING or LOCKED statue: Adobe API error: " + userinput + " was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API")
+                return None, None
             userdata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
             status = userdata["status"]
             if status == "ACTIVE":
