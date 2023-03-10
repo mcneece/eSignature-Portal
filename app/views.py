@@ -93,11 +93,6 @@ class AcrobatData(object):
         l = email.split("@")
         username, domainname = l[0], l[1]
 
-        # how many dots in domain name?
-        if domainname.count(".") != 1:
-            logging.warn("def emailvalidation: domain-name must have exactly one '.'!")
-            return False, "domain-name must have exactly one '.'!"
-
         # split into subdomain and top-level domain (TLD)
         subdomain, topleveldomain = domainname.split(".")
 
@@ -135,7 +130,7 @@ class AcrobatData(object):
             logging.warn("def actobatSignAccessCheck: The following request timed-out "+url)
             return False, "The following request timed-out"+url
         # Load JSON data into a variable
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
         if response.status_code == 200: # response was 200 (email was found) return True and user's ID
             
             userid = jsondata["userId"] # capture user ID for active check API and to return
@@ -155,7 +150,7 @@ class AcrobatData(object):
             if response.status_code == 404:
                 logging.error("def actobatSignAccessCheck: Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API")
                 return False, "Adobe API error: " + userinput + "was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API"
-            userdata = json.loads(response.text)
+            userdata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
             status = userdata["status"]
             if status == "ACTIVE":
                 logging.info("def acrobatSignAccessCheck: " + userinput + "= Active User")
@@ -193,7 +188,7 @@ class AcrobatData(object):
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
         # Load JSON data into a variable
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
 
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
@@ -230,7 +225,7 @@ class AcrobatData(object):
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
             
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
             logging.warn("def usersInGroup: groups/" + str(groupID) + "/users Response Error:",
@@ -278,7 +273,7 @@ class AcrobatData(object):
         }
         try:
             response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5)
-            jsondata = json.loads(response.text)
+            jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
 
             if response.status_code == 200:
 
@@ -295,7 +290,7 @@ class AcrobatData(object):
 
                 response = requests.get(url, headers=headers, data=payload, verify=False, timeout=5)
 
-                jsondata = json.loads(response.text)
+                jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
 
                 if response.status_code == 200:  # API success look through JSON data for group membership
                     temp = jsondata['resource']
@@ -359,7 +354,7 @@ class AcrobatData(object):
             # Alert UI with error
             return False, host + endpoint + "/groups Response Error: " + jsondata["code"] + ": " + jsondata["message"]
         
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
 
         counter = 0
         grouplist=[]
@@ -385,7 +380,7 @@ class AcrobatData(object):
         except requests.exceptions.Timeout:
             logging.warn("The following URL timed-out " + url)
             return False, "The following URL timed-out " + url
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
 
         if response.status_code != 200:
             logging.warn("def grouplist: " + host + endpoint + "/groups Response Error:",
