@@ -361,7 +361,7 @@ class AcrobatData(object):
         for each in jsondata["groupInfoList"]:
             grouplist.append(each["groupName"])
             counter += 1
-        return grouplist
+        return grouplist, counter
 
 
 # end of Request Modules===========================================================================================================
@@ -552,7 +552,8 @@ def findadmin():
     ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
                      # This file stores all AD users in the dtm_esignature security group
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
-    grouplist = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown and validate the user input
+    grouplist, count = ad.creategrouplist() #This creates a group list that will be used to populate the search dropdown and validate the user input
+    logging.info(f'We have {count} groups')
     admindict = {}  # Empty Dictionary that will be used to merge multiple Admin Dictionaries together
     
     config_object = ConfigParser()
@@ -699,3 +700,13 @@ def findadmin():
 def openticket():
     "This is the weppage users will visit to open one of the following tickets (Incident, Net New, Enhancement)"
     return render_template("client/openticket.html")
+
+@app.route("/admin")
+def admin():
+    "This is the beginning of our admin page which may grow to something more"
+    return render_template("admin/admin.html")
+
+@app.route("/testing")
+def testing():
+    "This is our automated test scripts page which is used for releases or testing with groups"
+    return render_template("admin/automated_testing.html")
