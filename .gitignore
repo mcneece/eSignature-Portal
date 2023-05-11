@@ -2,6 +2,7 @@
 config.py
 usermanagement.config
 acrobatsign.config
+private.key
 
 # Common code
 __pycache__/

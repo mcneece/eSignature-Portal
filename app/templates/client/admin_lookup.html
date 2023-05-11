@@ -20,7 +20,7 @@
 {% endif %}
 {% endwith %}
 
-<!--Flask Flash Message 'Group Not Found'-->
+<!--Flask Flash Message 'User Not Found'-->
 {% with messages = get_flashed_messages(category_filter=["emailNotFound"]) %}
 {% if messages %}
 {% for message in messages %}
@@ -50,7 +50,7 @@
 {% endif %}
 {% endwith %}
 
-<!--Flask Flash Message 'Group Not Found'-->
+<!--Flask Flash Message 'Missing Admin'-->
 {% with messages = get_flashed_messages(category_filter=["noAdmin"]) %}
 {% if messages %}
 {% for message in messages %}
@@ -124,16 +124,16 @@
                 {% endif %}
                 {% endwith %}
                 <div>
-                  <input type="email" id="mySearch" style="display: none;" spellcheck="false"
+                  <input type="email" id="mySearch" spellcheck="false"
                     placeholder="colleague@example.com" {{value}} class="w-75" data-bs-toggle="tooltip" data-bs-placement="top"
                     data-bs-custom-class="custom-tooltip" title="This top tooltip is themed via CSS variables."
                     name="email" />
                 </div>
-                <div id="emailHelp" class="form-text" style="display: none;">
+                <div id="emailHelp" class="form-text">
                   Enter a colleagues email address!
                 </div>
                 <div>
-                  <input list="group-list" id="mySearch2" name="group" placeholder="Group Name" spellcheck="false" class="w-75" autocomplete="off" {{value}}>
+                  <input list="group-list" id="mySearch2" style="display: none;" name="group" placeholder="Group Name" spellcheck="false" class="w-75" autocomplete="off" {{value}}>
 
                   <datalist id="group-list">
                     {% for group in grouplist %}
@@ -141,7 +141,7 @@
                     {% endfor %}
                   </datalist>
                 </div>
-                <div id="GroupHelp" class="form-text">
+                <div id="GroupHelp" class="form-text" style="display: none;">
                   Enter the name of an Acrobat Sign group
                 </div>
               </div>

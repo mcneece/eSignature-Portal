@@ -12,6 +12,23 @@ import os # For File paths
 import glob # FileName Globbing Utility
 import logging # Used for logging data to files
 
+# UMAPI/Email --------------------------------------
+import sys
+from urllib.parse import urlencode
+import whois
+import urllib3
+import pprint
+import time
+import jwt
+import getpass
+import functools
+import operator
+import smtplib
+import mimetypes
+from email.message import EmailMessage
+#from pyad import aduser
+
+# APP Constants for counting application usage
 from app import FINDADMINUSAGECOUNT_MONTH
 from app import FINDADMINUSAGECOUNT_YEAR
 from app import ACCESSUSAGECOUNT_MONTH
@@ -76,7 +93,7 @@ class AcrobatData(object):
             logging.error('Error with opening claimed fomains File __init__')
         self.valid_domains = domains_df["Domain"].to_list() # Assigns list of domains to instance attribute valid_domains
         self.bearer_id = app.config["SECRET_KEY"] #secret key for flask project
-
+    
     # Step 1
     def emailvalidation(self, email):
         "This function will take the users input and determine if it is a legit email (email is formatted correctly), and also run a domain check"
@@ -244,8 +261,8 @@ class AcrobatData(object):
             if i["isGroupAdmin"] == True:
                 listofadmins[groupName].append(i)
         return listofadmins
-    # Step 5
 
+    # Step 5
     def activeDirectoryCheck(self, email):
         "This function checks active directory to see the user is part of the required security group in Active Directory"
 
@@ -272,64 +289,135 @@ class AcrobatData(object):
             'Content-Type': 'application/json'
         }
         try:
-            response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5)
+            response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5) #Send HTTP request to AD to get access token
             jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
+        except ConnectionError as conn:
+                     raise RuntimeError(f'Connot connect to AD HTTP server for Access Token - {response.status_code}')
+        finally:
+            logging.warn(f'AD HTTP Connection Error - {response.status_code}')
 
-            if response.status_code == 200:
+        l = email.split("@")
+        username, domainname = l[0], l[1]
 
-                l = email.split("@")
-                username, domainname = l[0], l[1]
+        url = "https://" + ad_host + ad_endpoint + \
+            username+"%40"+domainname
 
-                url = "https://" + ad_host + ad_endpoint + \
-                    username+"%40"+domainname
-
-                payload = {}
-                headers = {
-                    'Authorization': 'Bearer '+jsondata["access_token"]
-                }
-
-                response = requests.get(url, headers=headers, data=payload, verify=False, timeout=5)
-
-                jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
-
-                if response.status_code == 200:  # API success look through JSON data for group membership
-                    temp = jsondata['resource']
-                    temp2 = temp['user']
-
-                    for each in temp2["memberOf"]:
-                        if each["name"] == "dtm_esignature":
-                            logging.info('def activeDirectoryCheck: Used AD API, dtm_esignature found for ' + email)
-                            return True
-                    logging.info('Used AD API, dtm_esiganture not found for' + email)
-                    return False
-                elif response.status_code == 404:
-                    logging.info('def activeDirectoryCheck: Used AD API, email (' + email + ') not found in active directory')
-                    return False
-
-        except Exception as fail:
-            logging.warn('def activeDirectoryCheck Did not use AD API')
+        payload = {}
+        headers = {
+            'Authorization': 'Bearer '+jsondata["access_token"] #Retrieved access token from above POST HTTP reequest
+        }
+        response = requests.get(url, headers=headers, data=payload, verify=False, timeout=5)
         
-        # If API call fails run backup CSV file
-        # Backup CSV file AD Lookup
-            try:
-                df = pd.read_csv(self.users_esignatures_file)
+        jsondata = json.loads(response.text) #.loads converts the JSON data into a Python Dictionary
+
+        if response.status_code == 200:  # API success look through JSON data pull member data
+            print("hello")
             
-            except Exception as e:
-                logging.warn("Error reading users Active Directory (dtm_esignature) file")
-                flash("Error reading users Active Directory (dtm_esignature) file", "alert")
-                if request.url in VALID_REDIRECT:
-                    return redirect(request.url)
-            logging.debug("Ran Backup CSV file")
-            self.users_esignatures = df["Mail"].to_list()
+        elif response.status_code == 404: # User not found in AD
+                print ("User not found, this will be updated to display a flash message that the email doesn't exist in AD")
+        else:
+                logging.warn(f'AD HTTP Connection Error - {response.status_code}')
+                    
+    def jwt_token():
+        #read confg file
+        config_file_name = "acrobatsign.config"
+        config = RawConfigParser()
+        config.read(config_file_name)
 
-            # Run through row in the csv file and check the email against the csv file of users in the dtm_esignature security group
-            if email in self.users_esignatures:
-                logging.warn('Used backup CSV file, Pass')
-                return True
-            else:
-                logging.warn('Used backup CSV file, Fail')
-                return False
+        #read parameters
+        ims_host = config.get("umapi_server", "ims_host")
+        ims_endpoint_jwt = config.get("umap_server", "ims_endpoint_jwt")
 
+        org_id = config.get("umapi_enterprise", "org_id")
+        tech_acct = config.get("umapi_enterprise", "tech_acct")
+        api_key = config.get("umapi_enterprise", "api_key")
+        client_secret = config.get("umapi_enterprise", "client_secret")
+        priv_key_filename = config.get("umapi_enterprise", "priv_key_filename")
+        jwt_token = config.get("umapi_enterprise", "jwt_token")
+
+        # Set the expiration time for the JSON Web Token to one day from the current time.
+        expiry_time = int(time.time())+60*60*24
+
+        #create payload
+        payload = {
+            'exp' : expiry_time,
+            'iss' : org_id,
+            'sub' : tech_acct,
+            'aud' : "https://" + ims_host + "/c/" + api_key
+        }
+
+        #define scope
+        scopes = [ "ent_user_sdk" ]
+
+        #Add Scopes
+        for scope in scopes:
+            payload["https://" + ims_host + "/s/" +scope]
+        
+        # Read the private key we will use to sign the JWT
+        priv_key_file = open(priv_key_filename)
+        priv_key = priv_key_file.read
+        priv_key_file.close
+
+        # Create JSON Web Token, signing it with the private key
+        jwt_token = jwt.encode(payload, priv_key, algorithm='R256')
+
+        #method parameter. The credentials are place in the boy of the POST request. the "client_id value is the API key"
+        url = "https://" + ims_host + ims_endpoint_jwt
+        
+        headers = {
+             "Content-Type" : "application/x-www-form-urlencoded",
+             "Cache-Control" : "no-cache"
+        }
+        
+        body_credentials = {
+             "client_id" : api_key,
+             "client_secret" : client_secret,
+             "jwt_token" : jwt_token
+        }
+
+        body = urlencode(body_credentials)
+
+        #Send HTTP request
+        response = requests.post(url, headers=headers, data=body)
+
+        #evaluate resposne
+        if response.status_code == 200:
+             jwt_token = json.loads(response.text)['access_token']
+             AcrobatData.savejwt(jwt_token) #Save JWT to file
+
+    def savejwt(webtoken):
+        "This function saves the JWT token to a file for reusage"
+        config_file_name = "count.ini" #.ini file allows us to write to the file without the sever restarting ("unlike .config files")
+        
+        config.set("umapi", "jwt_token", webtoken)
+        config_file = open(config_file_name, "w")
+        config.write(config_file)
+        config_file.close
+
+    def send_email(userinput):
+        "This function will send a welcom email to newly onboarded users of Adobe Acrobat Sign"
+
+        msg = EmailMessage()
+        msg['Subject'] = 'Adobe Acrobat Sign Access Notification'
+        msg['From'] = 'esignaturedtm@optum.com'
+        msg['To'] = userinput
+        msg['Cc'] = ''
+
+        htmlfile = 'app/templates/client/email-inline_welcome.html'
+        mime_type, _ =mimetypes.guess_type(htmlfile, strict=True)
+
+        #Read HTML file and embed the images to the email
+        with open(htmlfile, 'rb') as fp:
+             img_data = fp.read()
+             msg.set_content(img_data, maintype=mime_type, subtype='html')
+
+        # Send the email via our own SMTP server
+        s = smtplib.SMTP('mailo2.uhc.com')
+        s.send_message(msg)
+        s.quit
+# end of Request Modules===========================================================================================================
+
+# Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def creategrouplist(self):
         "this function creates a list of groups in Adobe Acrobat Sign"
         
@@ -363,12 +451,8 @@ class AcrobatData(object):
             counter += 1
         return grouplist, counter
 
-
-# end of Request Modules===========================================================================================================
-# Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
     def grouplist(self, groupName):
+        "Using group Name get group ID"
         url = "https://" + host + endpoint + "/groups" + "?pageSize=750"
 
         payload = {}
@@ -505,18 +589,20 @@ def signcheck():
                     flash(userinput, "access_success")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
-            elif result is None:
-                result = ad.activeDirectoryCheck(userinput)
-                # Step 4: Check Security Group (dtm_esignature)
-                # Step 4 passed: user is in the correct security group
-                if result == True:
-                    logging.error(userinput + " Failed lookup: Uknown Failure (Probably dual entitled)")
-                    flash(userinput, "unknown")
+            elif result is None: #This is where we need to create a fed ID and assign that user to dtm_esignature group in the adobe console 
+                # Step 4: Create Federated ID in the console with dtm_esignature group assignment (this has product entitlement to Adobe Sign Prod/SB)
+                result, firstname, lastname, location = ad.activeDirectoryCheck(userinput) # This is going to verify if the email is legit and return the first and sur names
+                
+                if result == True: # This means the user exist in AD but does not have access
+                    print("Code needed")
+                   
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)
                 # Step 4 Failed: User is not in the required security group
-                else:
-                    logging.warn(userinput + " is not in AD Group")
+                elif result == None: # This means the user was not found in AD 404
+                    print("Code Needed")
+                else: # This means there was an error in AD and the code didnt run properly have notify the user to open a ticket
+                    
                     flash(userinput, "adFail")
                     if request.url in VALID_REDIRECT:
                                 return redirect(request.url)

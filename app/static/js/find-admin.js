@@ -13,18 +13,18 @@ function toggleSlider() {
   
     // If the checkbox is checked, display the output text
     if (checkBox.checked == false){
-      searchemail.style.display = "none";
-      searchgroup.style.display = "inline-block";
-      emaillabel.style.display = "none";
-      grouplabel.style.display = "inline-block";
-      emailtext.style.display = "none";
-      grouptext.style.display = "inline-block";
-    } else {
-      searchemail.style.display = "inline-block";
       searchgroup.style.display = "none";
-      emaillabel.style.display = "inline-block";
+      searchemail.style.display = "inline-block";
       grouplabel.style.display = "none";
-      emailtext.style.display = "inline-block";
+      emaillabel.style.display = "inline-block";
       grouptext.style.display = "none";
+      emailtext.style.display = "inline-block";
+    } else {
+      searchgroup.style.display = "inline-block";
+      searchemail.style.display = "none";
+      grouplabel.style.display = "inline-block";
+      emaillabel.style.display = "none";
+      grouptext.style.display = "inline-block";
+      emailtext.style.display = "none";
     }
   }
