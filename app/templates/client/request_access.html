@@ -130,85 +130,9 @@
         </div>
         <!--Verify Access Tool-->
         <div class="col">
-            <div class="row">
-                <h1>Request Access</h1>
-            </div>
-            <!--Link to Secure.UHC-->
-            <div class="mb-3">
-                <p class="mb-2">Access to Adobe Acrobat Sign requires submitting a Secure request for a specific group
-                    membership.</p>
-                <a class="btn btn-primary btn-lg mb-3 me-3" target="_blank" href="https://secure.uhc.com">Request
-                    Access</a>
-                <!-- Video Instructions Trigger -->
-                <button type="button" class="btn btn-danger btn-sm me-2" data-bs-toggle="modal"
-                    data-bs-target="#videoModal">
-                    Video Instructions
-                </button>
-                <!--Written Instructions Trigger-->
-                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="offcanvas"
-                    data-bs-target="#textInstructions" aria-controls="offcanvasTop">Text
-                    Instructions</button>
-            </div>
-            <!-- Video Instructions -->
-            <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-fullscreen">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Secure Request Demonstration</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <video style="width:100vw" controls>
-                                <source src="{{ url_for('static', filename='img/request_access.mp4') }}">
-                            </video>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--Written Instructions-->
-            <div class="offcanvas offcanvas-end" tabindex="-1" id="textInstructions"
-                aria-labelledby="offcanvasTopLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasTopLabel">Acrobat Sign Secure Request</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <strong class="mb-3">To start the Secure Request Process visit <a
-                            href="https://secure.uhc.com">Secure.uhc.com</a></strong>
-                    <ol class="my-5" align="left">
-                        <li>Click 'Add Group Membership'</li>
-                        <li>Request for: <strong>Select 'Platform'</strong></li>
-                        <li>Platform: <strong>Select 'windows'</strong> (this is always windows even if you have
-                            a MAC)</li>
-                        <li>Platform: <strong>Select 'MS'</strong></li>
-                        <li>Environment and Resource will auto populate to Prod and MS (leave this as is)</li>
-                        <li>Next select the user ID you wish to apply group assignment</li>
-                        <li>Search for group: <strong>'dtm_esignature'</strong></li>
-                        <li>From <strong>Available Groups</strong> select <strong>'dtm_esignature'</strong>.
-                            Once selected, click
-                            the right arrow to move dtm_esignature to <strong>Selected Groups</strong></li>
-                        <li>click <strong>'Next'</strong></li>
-                        <li>For Access Expires: <strong>Select 'Permanent'</strong></li>
-                        <li>Supply a business justification</li>
-                    </ol>
-                    <strong>This secure request requires approval from the eSignature Support Team and the
-                        submitters manager!</strong>
-                </div>
-            </div>
-            <h1>Verify Access</h5>
+            <h1>Request Access to Adobe Acrobat Sign</h5>
                 <p class="card-text">
-                    Requesting access to Adobe Acrobat Sign is a multi-step process that requires action from the
-                    end-user
-                    and the eSignature Support Team. To simplify the request process please fill in your business
-                    email
-                    below, once submitted this webpage will generate detailed instructions on the steps needed to
-                    request
-                    access for the inputted user email. Steps will vary depending on where you are in the request
-                    process.
+                    By submitting this request an Adobe Acrobat Sign account will be created, in UHG's instance, for the following user! 
                 </p>
                 <!--Verify Email Form-->
                 <form action="/request-access" method="POST">
