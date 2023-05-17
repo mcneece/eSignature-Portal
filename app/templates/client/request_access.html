@@ -35,6 +35,29 @@
 {% endif %}
 {% endwith %}
 
+<!--Flask Flash Message 'User Created'-->
+{% with messages = get_flashed_messages(category_filter=["access_granted"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
+    <div class="alert-heading align-items-center">
+        <h4 style="text-transform: uppercase; position: relative;">Access Granted to Adobe Acrobat Sign for {{ message
+            }}</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following account <strong>{{ message }}</strong> has been created in Adobe Acrobat Sign!</p>
+    <hr>
+    <p>For security all accounts created in Adobe Acrobat Sign will not have the ability to send. To get send access you
+        will need to be assigned to an existing group in Acrobat Sign, to get assigned to a group you will need to
+        contact your group admin. To find you group admin use the <a target="_blank"
+            href="https://esign.optum.com/find-admin">find admin tool</a>.</p>
+    <hr>
+    <p>Login to <a target="_blank" href="https://unitedhg.na3.adobesign.com/account/homeJS">Adobe Acrobat Sign</a>!</p>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <!--Flask Flash Message 'Access Check Incomplete'-->
 {% with messages = get_flashed_messages(category_filter=["default_group"]) %}
 {% if messages %}
@@ -44,9 +67,11 @@
         <h4 style="text-transform: uppercase; position: relative;">Missing Group Assignment</h4>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <p>The following user <strong>{{ message }}</strong> has access to Adobe Acrobat Sign, but is missing group assignment.
-    By default, all accounts created in Acrobat Sign will not have the ability to send. You will need to contact your group 
-    admin to add you to an appropriate group with send access.</p>
+    <p>The following user <strong>{{ message }}</strong> has access to Adobe Acrobat Sign, but is missing group
+        assignment.
+        By default, all accounts created in Acrobat Sign will not have the ability to send. You will need to contact
+        your group
+        admin to add you to an appropriate group with send access.</p>
     <hr>
     <p>Don't know your group admin?... No worries use our <a href="/find-admin">Find My Admin tool</a></p>
 </div>
@@ -74,29 +99,38 @@
 {% endif %}
 {% endwith %}
 
-<!--Flask Flash Message 'Not in AD Group'-->
+<!--Flask Flash Message 'Email not found in AD'-->
+{% with messages = get_flashed_messages(category_filter=["ad_notfound"]) %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
+    <div class="header">
+        <h4 style="text-transform: uppercase; position: relative;">{{ message }} Not in UHG's Active Directory</h4>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>The following email <strong>{{ message }}</strong> was not found in UHG's Active Directory. Please validate the email is typed correctly and the user has an active MSID.</p>
+    <hr class="mb-2">
+    <h5>If the email is correct</h5>
+    <p>Please <a target = "_blank" href="https://atlas.uhg.com/contactLanding/openTicket#">open a ticket</a> and you will get technical assistance for your Adobe Sign provisioning.
+    <ul>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!--Flask Flash Message 'Not in Active Directory'-->
 {% with messages = get_flashed_messages(category_filter=["adFail"]) %}
 {% if messages %}
 {% for message in messages %}
 <div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
     <div class="header">
-        <h4 style="text-transform: uppercase; position: relative;">Missing Access Request</h4>
+        <h4 style="text-transform: uppercase; position: relative;">API Error: UHG Active Directory</h4>
     </div>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <p>The following user <strong>{{ message }}</strong> is not part of the required security group. Please follow the
-        prompts below to request access via Secure.</p>
+    <p>Request Error Client Portal.</p>
     <hr class="mb-2">
-    <h5>After Submission:</h5>
-    <ul>
-        <li>Wait for your request to be approved by your manager and the eSignature Support Team.</li>
-        <li>Once your request is approved the system will automatically create an account in Adobe Acrobat Sign. This
-            automated sync process can take up to three hours.</li>
-    </ul>
-    <hr class="mb-2">
-    <h5>How to Verify:</h5>
-    <p>To verify next steps in the request process, submit your email again using this tool. If you get this same
-        alert that means one of the following: Your request has not yet been
-        approved or may have been denied by your manager, or the automated sync tool is still running (this can take up to 3 hours after your request has been approved).</p>
+    <p>Please <a target="_blank" href="https://atlas.uhg.com/contactLanding/openTicket#">open a ticket</a> with the help desk to notify the esignature support team.</p>
+
 </div>
 {% endfor %}
 {% endif %}
@@ -132,7 +166,8 @@
         <div class="col">
             <h1>Request Access to Adobe Acrobat Sign</h5>
                 <p class="card-text">
-                    By submitting this request an Adobe Acrobat Sign account will be created, in UHG's instance, for the following user! 
+                    By submitting this request an Adobe Acrobat Sign account will be created, in UHG's instance, for the
+                    following user!
                 </p>
                 <!--Verify Email Form-->
                 <form action="/request-access" method="POST">
