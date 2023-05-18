@@ -5,6 +5,8 @@ import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
 from app import app  # for running Flask app
 # Project is built on Flask APP
+from requests import packages
+import urllib3
 from flask import render_template, request, redirect, flash
 from configparser import ConfigParser
 # Setup Logging ------------------------------------
@@ -17,6 +19,7 @@ import logging  # Used for logging data to files
 
 # UMAPI/Email --------------------------------------
 from urllib.parse import urlencode
+import urllib3
 import time
 import jwt
 import smtplib
@@ -47,8 +50,7 @@ if len(list_of_files) > 15:
     os.remove(list_of_files[0])
 
 # This code is required to disable SSL cert verification for AD Lookup API call (suppress the warning from urllib3)
-from urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) # supresses "InsecureRequestWarning: Unverified HTTPS request is being made to host"
 
 # read configuration files [user management]
 acrobat_sign_config = 'acrobatsign.config'
