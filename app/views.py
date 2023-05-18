@@ -16,7 +16,7 @@ import glob  # FileName Globbing Utility
 import logging  # Used for logging data to files
 
 # UMAPI/Email --------------------------------------
-import sys
+import urllib3
 from urllib.parse import urlencode
 import time
 import jwt
@@ -25,31 +25,29 @@ import mimetypes
 from email.message import EmailMessage
 #from pyad import aduser
 
-# APP Constants for counting application usage
+# Global Varibles used as KPIs, writes in the count.ini file how often the application is being used each Month and Year
 from app import FINDADMINUSAGECOUNT_MONTH
 from app import FINDADMINUSAGECOUNT_YEAR
 from app import ACCESSUSAGECOUNT_MONTH
 from app import ACCESSUSAGECOUNT_YEAR
+#--- End of KPI creation
 
-
+# Create Log Files for debugging
 now = datetime.datetime.now()  # gets current date and time
-debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')  # Creates debug file
+debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')  # Creates log file for the day if it doesn't already exist
 logging.basicConfig(level=logging.INFO, filename=(debuglogfile), encoding='utf-8', filemode='a',
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(asctime)s - %(levelname)s - %(message)s") # Set configurations for logging
 
-dir_name = 'Logs/'  # Log file directory
 # Get list of all files in the Log file directory
-list_of_files = filter(os.path.isfile,
-                       glob.glob(dir_name + '*'))
+dir_name = 'Logs/'  # Log file directory
+list_of_files = filter(os.path.isfile, glob.glob(dir_name + '*'))
 # Sort list of files based on last modification time in ascending order
-list_of_files = sorted(list_of_files,
-                       key=os.path.getmtime)
+list_of_files = sorted(list_of_files, key=os.path.getmtime)
 # Delete the oldest file after 15 log files have been created
 if len(list_of_files) > 15:
     os.remove(list_of_files[0])
 
-# Suppress only the single warning from urllib3
-# This code is required to disable SSL cert verification for AD Lookup API call
+# This code is required to disable SSL cert verification for AD Lookup API call (suppress the warning from urllib3)
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # read configuration files [user management]
@@ -289,26 +287,26 @@ class AcrobatData(object):
     # Step 5
     def activeDirectoryCheck(self, email):
         "This function checks active directory to see the user is part of the required security group in Active Directory"
-
+        acrobat_sign_config = 'acrobatsign.config'
+        config = RawConfigParser()
+        config.read(acrobat_sign_config)
         # Active Directory server parameters
         ad_host = config.get("active_directory_server", "host")
         ad_endpoint = config.get("active_directory_server", "endpoint")
-        ad_token_endpoint = config.get(
-            "active_directory_server", "token_endpoint")
+        ad_token_endpoint = config.get("active_directory_server", "token_endpoint")
 
         # Active Directory enterprise parameters
         client_id = config.get("active_directory_enterprise", "client_id")
-        client_secret = config.get(
-            "active_directory_enterprise", "client_secret")
+        client_secret = config.get("active_directory_enterprise", "client_secret")
         grant_type = config.get("active_directory_enterprise", "grant_type")
 
         # API AD Lookup
         url = "https://" + ad_host + ad_token_endpoint
 
         payload = json.dumps({
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "grant_type": grant_type
+            "client_id" : client_id,
+            "client_secret" : client_secret,
+            "grant_type" : grant_type
         })
 
         headers = {
@@ -316,10 +314,10 @@ class AcrobatData(object):
         }
         try:
             # Send HTTP request to AD to get access token
-            response = requests.post(
-                url, headers=headers, data=payload, verify=False, timeout=5)
+            response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5)
             # .loads converts the JSON data into a Python Dictionary
             jsondata = json.loads(response.text)
+        
         except ConnectionError as conn:
             raise RuntimeError(
                 f'Connot connect to AD HTTP server for Access Token - {response.status_code}')
@@ -426,7 +424,7 @@ class AcrobatData(object):
             body = urlencode(body_credentials)
 
             # Send HTTP request
-            response = requests.post(url, headers=headers, data=body)
+            response = requests.post(url, headers=headers, data=body, timeout=5)
 
             # evaluate resposne
             if response.status_code == 200:
@@ -746,7 +744,7 @@ def signcheck():
                     return redirect(request.url)
         # Step 1 Failed: users domain is not claimed in the UHG console
         elif bool is None:
-            logging.warn(userinput + "failed domain check")
+            logging.warn(userinput + " failed domain check")
             flash(message, "domain_fail")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
