@@ -18,14 +18,8 @@ import logging  # Used for logging data to files
 # UMAPI/Email --------------------------------------
 import sys
 from urllib.parse import urlencode
-import whois
-import urllib3
-import pprint
 import time
 import jwt
-import getpass
-import functools
-import operator
 import smtplib
 import mimetypes
 from email.message import EmailMessage
@@ -80,8 +74,6 @@ VALID_REDIRECT = ["https://esign.optum.com/request-access", "https://esignstage.
                   "https://esign.optum.com/find-admin", "https://esignstage.optum.com/find-admin", "http://127.0.0.1:5000/find-admin"]
 
 # Start of Modules____________________________________________________________________________________
-
-
 class AcrobatData(object):
     "Grouping of methods that takes a user input and checks their Acrobat Sign access as well as giving them information on potential solutions if they do not pass validation"
     # Start of Request Modules========================================================================
@@ -512,7 +504,6 @@ class AcrobatData(object):
         
     def send_email(self, email):
         "This function will send a welcom email to newly onboarded users of Adobe Acrobat Sign"
-
         msg = EmailMessage()
         msg['Subject'] = 'Adobe Acrobat Sign Access Notification'
         msg['From'] = 'esignaturedtm@optum.com'
@@ -615,7 +606,6 @@ def home():
 
 @app.route("/request-access", methods=["GET", "POST"])
 def signcheck():
-
     logging.debug(
         '-----------------------    REQUEST ACCESS PAGE    --------------------------------')
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
@@ -770,7 +760,6 @@ def signcheck():
     # Loads Orign HTML Template for Webpage
     return render_template("client/request_access.html")
 # End Request Page____________________________________________________________________________________________________________________________________________________
-
 
 @app.route("/find-admin", methods=["GET", "POST"])
 def findadmin():
