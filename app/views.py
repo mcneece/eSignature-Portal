@@ -16,7 +16,6 @@ import glob  # FileName Globbing Utility
 import logging  # Used for logging data to files
 
 # UMAPI/Email --------------------------------------
-import urllib3
 from urllib.parse import urlencode
 import time
 import jwt
@@ -48,6 +47,7 @@ if len(list_of_files) > 15:
     os.remove(list_of_files[0])
 
 # This code is required to disable SSL cert verification for AD Lookup API call (suppress the warning from urllib3)
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # read configuration files [user management]
