@@ -1,90 +1,89 @@
+#**************************************************
+# Views.py is the core code base for running the backend of the flask application
+# Script checks user access, creates users in the Adobe Console and in Adobe Sign, and helps users find Admins
+#**************************************************
+
+##########
+# Import application modules and classes
+##########
 from configparser import RawConfigParser
 from urllib3.exceptions import InsecureRequestWarning
 import pandas as pd  # for reading csv files (domains, AD group backup file)
 import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
 from app import app  # for running Flask app
-# Project is built on Flask APP
-from requests import packages
-import urllib3
+from requests import packages # For all API calls
+import urllib3 # for Active Directory API calls
 from flask import render_template, request, redirect, flash
-from configparser import ConfigParser
-# Setup Logging ------------------------------------
-import datetime
-from datetime import date
-from datetime import timedelta
+from configparser import ConfigParser # for reading in values from config and .ini files
+import datetime # for KPIs and Logging
+from datetime import date # for KPIs and Logging
+from datetime import timedelta # for KPIs and Logging
 import os  # For File paths
 import glob  # FileName Globbing Utility
-import logging  # Used for logging data to files
+import logging  # for logging data to files
+from urllib.parse import urlencode # for UMAPI encoding JWT
+import time # for KPIs and Logging
+import jwt # for UMAPI jwt
+import smtplib # for email method to send automated emails
+import mimetypes # for email method to send automated emails
+from email.message import EmailMessage # for email method to send automated emails
 
-# UMAPI/Email --------------------------------------
-from urllib.parse import urlencode
-import urllib3
-import time
-import jwt
-import smtplib
-import mimetypes
-from email.message import EmailMessage
-#from pyad import aduser
-
+########### 
 # Global Varibles used as KPIs, writes in the count.ini file how often the application is being used each Month and Year
+###########
 from app import FINDADMINUSAGECOUNT_MONTH
 from app import FINDADMINUSAGECOUNT_YEAR
 from app import ACCESSUSAGECOUNT_MONTH
 from app import ACCESSUSAGECOUNT_YEAR
-#--- End of KPI creation
 
-# Create Log Files for debugging
+##########
+#  Create Log Files for Debugging
+##########
 now = datetime.datetime.now()  # gets current date and time
-debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log')  # Creates log file for the day if it doesn't already exist
+debuglogfile = now.strftime('Logs/%b %d %Y DEBUG.log') # Creates log file for the day if it doesn't already exist
 logging.basicConfig(level=logging.INFO, filename=(debuglogfile), encoding='utf-8', filemode='a',
-                    format="%(asctime)s - %(levelname)s - %(message)s") # Set configurations for logging
-
-# Get list of all files in the Log file directory
+                    format="%(asctime)s - %(levelname)s - %(message)s")  # Set configurations for logging
 dir_name = 'Logs/'  # Log file directory
 list_of_files = filter(os.path.isfile, glob.glob(dir_name + '*'))
-# Sort list of files based on last modification time in ascending order
-list_of_files = sorted(list_of_files, key=os.path.getmtime)
-# Delete the oldest file after 15 log files have been created
+list_of_files = sorted(list_of_files, key=os.path.getmtime) # Sort list of files based on last modification time in ascending order
 if len(list_of_files) > 15:
-    os.remove(list_of_files[0])
+    os.remove(list_of_files[0]) # Delete the oldest file after 15 log files have been created
 
-# This code is required to disable SSL cert verification for AD Lookup API call (suppress the warning from urllib3)
+##########
+# Disable SSL cert verification for AD Lookup API call (suppress the warning from urllib3)
+##########
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) # supresses "InsecureRequestWarning: Unverified HTTPS request is being made to host"
 
-# read configuration files [user management]
+##########
+#  Read Configuration Files and assing variables
+#########
 acrobat_sign_config = 'acrobatsign.config'
 config = RawConfigParser()
 config.read(acrobat_sign_config)
 
-# Acrobat Sign server parameters
 host = config.get("acrobat_sign_server", "host")
 endpoint = config.get("acrobat_sign_server", "endpoint")
-
-# Acrobat Sign enterprise parameters
 access_token = config.get("acrobat_sign_enterprise", "access_token")
-
-# Get Fed ID token
 jwt_config = 'count.ini'
 config.read(jwt_config)
 token = config.get("umapi", "jwt_token")
 
-# List of valid redirects
+##########
+#  Set valid URL redirects to ensure redirects back to web application after executing a task only go to our verified web URLS
+#########
 VALID_REDIRECT = ["https://esign.optum.com/request-access", "https://esignstage.optum.com/request-access", "http://127.0.0.1:5000/request-access",
-                  "https://esign.optum.com/find-admin", "https://esignstage.optum.com/find-admin", "http://127.0.0.1:5000/find-admin"]
+                  "https://esign.optum.com/find-admin", "https://esignstage.optum.com/find-admin", "http://127.0.0.1:5000/find-admin"] #  List of valid redirects
 
-# Start of Modules____________________________________________________________________________________
-class AcrobatData(object):
+###########
+# Custom Modules for Flask Application (class eSignature)
+###########
+class eSignature(object):
     "Grouping of methods that takes a user input and checks their Acrobat Sign access as well as giving them information on potential solutions if they do not pass validation"
     # Start of Request Modules========================================================================
 
-    def __init__(self, claimed_domains_file, users_esignatures_file):
-        '''create instance and load data from local files. If emails_file is not N, this would be a cache
-        claimed_domains_file (str): path to local file with claimed domains'''
-
-        # make file paths into instance attributes
-        self.users_esignatures_file = users_esignatures_file
-        self.users_esignatures = None
+    def __init__(self, claimed_domains_file):
+        '''claimed_domains_file (str): path to local file with claimed domains'''
 
         # using pandas to read in the csv file as a dataframe and then extract column A {domains} and put them in a list
         try:
@@ -96,35 +95,28 @@ class AcrobatData(object):
         # secret key for flask project
         self.bearer_id = app.config["SECRET_KEY"]
 
-    # Step 1
-    def emailvalidation(self, email):
-        "This function will take the users input and determine if it is a legit email (email is formatted correctly), and also run a domain check"
-        # HTML already catches the appropraite email format for only one @ sign
 
-        # If email = blank
-        if email == "":
+    def emailvalidation(self, email):
+        '''Takes email input and determines if it is a legit email and also runs a  claimed domain check'''
+        
+        # Input catches the appropraite email format for only one @ sign
+
+        if email == "": # no value was given for email
             logging.warn("def emailvalidation: No email given")
             return False, "No email given!"
 
-        # makes email all lower case to ensure that there is issues matching due to case sensativity.
-        email = email.lower()
+        email = email.lower() # makes email all lower case to ensure that there is issues matching due to case sensativity.
+        l = email.split("@")   # Split username and domainname
+        username, domainname = l[0], l[1] # grab domain value
+        subdomain, topleveldomain = domainname.split(".")  # split into subdomain and top-level domain (TLD)
 
-        # Split username and domainname
-        l = email.split("@")
-        username, domainname = l[0], l[1]
-
-        # split into subdomain and top-level domain (TLD)
-        subdomain, topleveldomain = domainname.split(".")
-
-        # is top-level domain (TLD) legit?
-        if topleveldomain not in ["com", "edu", "org", "gov", "net"]:
+        if topleveldomain not in ["com", "edu", "org", "gov", "net"]: # is top-level domain (TLD) legit?
             logging.warn(
                 "def emailvalidation: domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net")
             return False, "domain name must have one of the following top-level-domains: .com, .edu, .org, .gov, .net"
 
-        # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
         domainlist = []
-        for x in self.valid_domains:
+        for x in self.valid_domains:  # is domain inside the valid_domains list (is it claimed in Adobe root console for UHG)?
             domainlist.append(x.lower())
         if domainname in domainlist:
             logging.debug("Passed email validation")
@@ -134,12 +126,11 @@ class AcrobatData(object):
                          " is not a claimed domain in UHG Adobe console")
             return None, domainname
 
-    # Step 2
-    def acrobatSignAccessCheck(self, userinput):
-        "This function takes an email as a parameter and runs a GET user/userByEmail API call to Acrobat Sign returning email:'example@example.com', id:'1234567',isAccountAdmin:'(True, False)'"
 
-        # Make API call using Python requests package, Adobe v6 rest API Get /userByEmail
-        url = "https://" + host + endpoint + "/users/userByEmail"
+    def acrobatSignAccessCheck(self, userinput):
+        '''Takes email perameter and makes an API call to Adobe to check if users has Adobe Sign access'''
+
+        url = "https://" + host + endpoint + "/users/userByEmail" # Request URL for userByEmail
 
         payload = {}
         headers = {
@@ -151,8 +142,8 @@ class AcrobatData(object):
                 url, headers=headers, data=payload, timeout=5)
         except requests.exceptions.Timeout:
             logging.warn(
-                "def actobatSignAccessCheck: The following request timed-out "+url)
-            return False, "The following request timed-out"+url
+                "def actobatSignAccessCheck: The following request timed-out " + url)
+            return False, "The following request timed-out" + url
         # Load JSON data into a variable
         # .loads converts the JSON data into a Python Dictionary
         jsondata = json.loads(response.text)
@@ -162,7 +153,7 @@ class AcrobatData(object):
             # capture user ID for active check API and to return
             userid = jsondata["userId"]
 
-            # Active check API call
+            # API call to Adobe: USERS/{USERID}
             url = "https://" + host + endpoint + "/users/" + userid
 
             payload = {}
@@ -174,22 +165,23 @@ class AcrobatData(object):
                     url, headers=headers, data=payload, timeout=5)
             except requests.exceptions.Timeout:
                 logging.error(
-                    "def actobatSignAccessCheck: The following request timed-out "+url)
-                return False, "The following request timed-out"+url
+                    "def actobatSignAccessCheck: The following request timed-out " + url)
+                return False, "The following request timed-out" + url
             if response.status_code == 404:
                 logging.error("def actobatSignAccessCheck: " + userinput + " is in a PENDING or LOCKED statue: Adobe API error: " + userinput +
                               " was found in UserByEmail API... userId:" + userid + " but that ID gave a 404 error in the /users/\{userID\} API")
                 return None, None
-            # .loads converts the JSON data into a Python Dictionary
-            userdata = json.loads(response.text)
+            
+            userdata = json.loads(response.text) # .loads converts the JSON data into a Python Dictionary
+            # Check if the users status is Active
             status = userdata["status"]
             if status == "ACTIVE":
                 logging.info("def acrobatSignAccessCheck: " +
-                             userinput + "= Active User")
+                             userinput + " = Active User")
                 return True, userid
             else:
                 logging.info("def acrobatSignAccessCheck: " +
-                             userinput + "Inactive User")
+                             userinput + " = Inactive User")
                 return None, "User is not created in an \'ACTIVE\' status"
 
         # response is 404 then user email (x-email in header of API call) does not exist in UHG's Acrobat Sign
@@ -204,11 +196,11 @@ class AcrobatData(object):
             # Alert User in UI
             return False, "users/userByEmail Response Error: " + str(jsondata["code"]) + ": " + jsondata["message"]
 
-    # Step 3
+
     def groupCheck(self, userID):
         "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
 
-        # Make API call using Python requests package
+        # API call to Adobe: USER/{USERID}/GROUPS
         url = "https://" + host + endpoint + "/users/" + userID + "/groups"
 
         payload = {}
@@ -236,7 +228,7 @@ class AcrobatData(object):
                   str(jsondata["code"]) + ": " + jsondata["message"], "alert")
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
-
+        # Get user groups and Ids for a specific user
         groupinfo = jsondata["groupInfoList"]
         returnedinfo = []
         for i in groupinfo:  # For each group the user is apart of grab the name and groupid
@@ -244,10 +236,11 @@ class AcrobatData(object):
             returnedinfo.append(nameandid)
         return returnedinfo
 
-    # Step 4
+
     def usersInGroup(self, groupID, groupName):
         "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
-        # This only works if our Group Sizes stay under 5k
+        # API call to Adobe: GROUPS/{GROUPID}/USERS
+        # # # This only works if our Group Sizes stay under 5k
         url = "https://" + host + endpoint + "/groups/" + \
             groupID + "/users" + "?pageSize=5000"
 
@@ -265,8 +258,7 @@ class AcrobatData(object):
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
 
-        # .loads converts the JSON data into a Python Dictionary
-        jsondata = json.loads(response.text)
+        jsondata = json.loads(response.text) # .loads converts the JSON data into a Python Dictionary
         # If response is not 200 then unkown error stop system
         if response.status_code != 200:
             logging.warn("def usersInGroup: groups/" + str(groupID) + "/users Response Error:",
@@ -277,7 +269,7 @@ class AcrobatData(object):
             if request.url in VALID_REDIRECT:
                 return redirect(request.url)
 
-        # Creates a dictionary for grabing admins:
+        # Creates a dictionary of only Group Admins:
         listofadmins = {groupName: []}
         # loops through all users in the group and if they are an admin adds them to the list of admins dictionary
 
@@ -286,7 +278,7 @@ class AcrobatData(object):
                 listofadmins[groupName].append(i)
         return listofadmins
 
-    # Step 5
+
     def activeDirectoryCheck(self, email):
         "This function checks active directory to see the user is part of the required security group in Active Directory"
         acrobat_sign_config = 'acrobatsign.config'
@@ -295,20 +287,22 @@ class AcrobatData(object):
         # Active Directory server parameters
         ad_host = config.get("active_directory_server", "host")
         ad_endpoint = config.get("active_directory_server", "endpoint")
-        ad_token_endpoint = config.get("active_directory_server", "token_endpoint")
+        ad_token_endpoint = config.get(
+            "active_directory_server", "token_endpoint")
 
         # Active Directory enterprise parameters
         client_id = config.get("active_directory_enterprise", "client_id")
-        client_secret = config.get("active_directory_enterprise", "client_secret")
+        client_secret = config.get(
+            "active_directory_enterprise", "client_secret")
         grant_type = config.get("active_directory_enterprise", "grant_type")
 
         # API AD Lookup
         url = "https://" + ad_host + ad_token_endpoint
 
         payload = json.dumps({
-            "client_id" : client_id,
-            "client_secret" : client_secret,
-            "grant_type" : grant_type
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": grant_type
         })
 
         headers = {
@@ -316,15 +310,19 @@ class AcrobatData(object):
         }
         try:
             # Send HTTP request to AD to get access token
-            response = requests.post(url, headers=headers, data=payload, verify=False, timeout=5)
+            response = requests.post(
+                url, headers=headers, data=payload, verify=False, timeout=5)
             # .loads converts the JSON data into a Python Dictionary
             jsondata = json.loads(response.text)
-        
+        except requests.exceptions.Timeout:
+            logging.warn(
+                "def usersInGroup: The following URL timed-out " + url)
+            flash("The following URL timed-out " + url, "alert")
+            if request.url in VALID_REDIRECT:
+                return redirect(request.url)
         except ConnectionError as conn:
             raise RuntimeError(
                 f'Connot connect to AD HTTP server for Access Token - {response.status_code}')
-        finally:
-            logging.warn(f'AD HTTP Connection Error - {response.status_code}')
 
         l = email.split("@")
         username, domainname = l[0], l[1]
@@ -357,6 +355,7 @@ class AcrobatData(object):
             logging.warn(f'AD HTTP Connection Error - {response.status_code}')
             return False, None, None
 
+
     def jwt_token():
         # read confg file
         config_file_name = "acrobatsign.config"
@@ -378,7 +377,7 @@ class AcrobatData(object):
         config = RawConfigParser()
         config.read(config_file_name)
 
-        expired_time = config.get("umapi","expired_time")
+        expired_time = config.get("umapi", "expired_time")
         jwt_token = (config.get("umapi", "jwt_token"))
 
         now = int(time.time())
@@ -426,19 +425,21 @@ class AcrobatData(object):
             body = urlencode(body_credentials)
 
             # Send HTTP request
-            response = requests.post(url, headers=headers, data=body, timeout=5)
+            response = requests.post(
+                url, headers=headers, data=body, timeout=5)
 
             # evaluate resposne
             if response.status_code == 200:
                 jwt_token = json.loads(response.text)['access_token']
-                AcrobatData.savejwt(jwt_token, expiry_time)
+                eSignature.savejwt(jwt_token, expiry_time)
                 return jwt_token
         else:
             return jwt_token
-            
+
+
     def savejwt(webtoken, expired_time):
         "This function saves the JWT token and expiration of token to a file for reusage until it expires"
-        #.ini file allows us to write to the file without the sever restarting ("unlike .config files")
+        # .ini file allows us to write to the file without the sever restarting ("unlike .config files")
         config_file_name = "count.ini"
 
         config.set("umapi", "jwt_token", webtoken)
@@ -447,6 +448,7 @@ class AcrobatData(object):
         config.write(config_file)
         config_file.close
         return
+
 
     def createUser(self, email, fName, lName):
         "This function creates a federated ID in UHG's Adobe Sign console with group assignment to dtm_esignature"
@@ -460,48 +462,50 @@ class AcrobatData(object):
         org_id = config.get("umapi_enterprise", "org_id")
         api_key = config.get("umapi_enterprise", "api_key")
 
-        token = AcrobatData.jwt_token()
+        token = str(eSignature.jwt_token())
 
         url = "https://" + host + endpoint + "/action/" + org_id
         headers = {
-            "Content-type" : "application/json",
-            "Accept" : "application/json",
-            "x-api-key" : api_key,
-            "Authorization" : "Bearer " + token 
+            "Content-type": "application/json",
+            "Accept": "application/json",
+            "x-api-key": api_key,
+            "Authorization": "Bearer " + token
         }
 
         json_data = \
             [{
-            "user" : email,
-            "requestID" : "action_1",
-            "do" :[
-                {
-                    "createFederatedID" :{
-                        "email" : email,
-                        "firstname" : fName,
-                        "lastname" : lName,
-                        "option" : "ignoreIfAlreadyExists" #If the user exist in the console it will not create another user
+                "user": email,
+                "requestID": "action_1",
+                "do": [
+                    {
+                        "createFederatedID": {
+                            "email": email,
+                            "firstname": fName,
+                            "lastname": lName,
+                            # If the user exist in the console it will not create another user
+                            "option": "ignoreIfAlreadyExists"
+                        }
+                    },
+                    {
+                        "add": {
+                            "group": [
+                                "dtm_esignature"
+                            ]
+                        }
                     }
-            },
-            {
-                "add":{
-                    "group" :[
-                        "dtm_esignature"
-                    ]
-                }
-            }
                 ]
             }]
-        
-        #Prepare Body
+
+        # Prepare Body
         body = json.dumps(json_data)
 
         res = requests.post(url, headers=headers, data=body)
-        if res.status_code == 200:
+        if res.status_code == 200: 
             return True, res.status_code, email + " was created in the Adobe Console"
         else:
             return False, res.status_code, email + " was NOT created in the Adobe Console"
-        
+
+
     def send_email(self, email):
         "This function will send a welcom email to newly onboarded users of Adobe Acrobat Sign"
         msg = EmailMessage()
@@ -523,9 +527,8 @@ class AcrobatData(object):
         s.send_message(msg)
         s.quit
         return
-# end of Request Modules===========================================================================================================
 
-# Start of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     def creategrouplist(self):
         "this function creates a list of groups in Adobe Acrobat Sign"
 
@@ -591,26 +594,28 @@ class AcrobatData(object):
             if groupName.lower() == i["groupName"].lower():
                 groupID = i["groupId"]
         return True, groupID
-    # End of Find Admin Modules++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# End of modules __________________________________________________________________________________________________________________________________________________
 
 
+#**************************************************
+# Home Page
+#**************************************************
 @app.route("/")
 def home():
     logging.debug(
         '-----------------------    HOME PAGE     --------------------------------')
     "This is the home page containing information and links to Adobe Acrobat Sign, most of this code is in the index.html file"
     return render_template("client/index.html")
-# End Home Page____________________________________________________________________________________________________________________________________________________
 
-
+#*****************************************
+# Request Access Page
+#*****************************************
 @app.route("/request-access", methods=["GET", "POST"])
-def signcheck():
+def requestaccess():
     logging.debug(
         '-----------------------    REQUEST ACCESS PAGE    --------------------------------')
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
     # make a instance (object) of the class and use instance methods from now on
-    ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",
+    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv",
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
 
     # Read config file for writting globals to config
@@ -707,34 +712,41 @@ def signcheck():
                         return redirect(request.url)
             elif result is None:  # User does not have an Adobe Sign account
                 # Step 4: Validate they are a existing employee in Active Directory (returns first and last name)
-                result, fName_code, lName_message = ad.activeDirectoryCheck(userinput)
+                result, fName_code, lName_message = ad.activeDirectoryCheck(
+                    userinput)
                 if result == True:  # This means the user exist in AD but does not have access, Create Federated ID
-                    result, code, message = ad.createUser(userinput, fName_code, lName_message)
+                    result, code, message = ad.createUser(
+                        userinput, fName_code, lName_message)
                     if result == True:  # Users was successfully created
                         logging.info(
                             "Federated ID succesfully created for" + userinput)
-                        ad.send_email(userinput) # Sends a welcome email to the user
+                        # Sends a welcome email to the user
+                        ad.send_email(userinput)
                         logging.debug("Welcome email sent" + userinput)
                         flash(userinput, "access_granted")
                         if request.url in VALID_REDIRECT:
                             return redirect(request.url)
                     elif result == False and code == 404:
-                        logging.info("The following user already exist" + userinput)
+                        logging.info(
+                            "The following user already exist" + userinput)
                         flash(userinput, "umapi_exist")
                         if request.url in VALID_REDIRECT:
                             return redirect(request.url)
                     else:
-                        logging.error("The following error occurd with UMAPI API: " + fName_code + ": " + lName_message + "for " + userinput)
+                        logging.error("The following error occurd with UMAPI API: " +
+                                      str(code) + ": " + message + " for " + userinput)
                         flash(userinput, "adFail")
                         if request.url in VALID_REDIRECT:
                             return redirect(request.url)
-                elif result == None: # Email not found in Active Directory
-                    logging.info("The following user email (" + userinput + ") was not found in UHG's Active Directory")
+                elif result == None:  # Email not found in Active Directory
+                    logging.info("The following user email (" + userinput +
+                                 ") was not found in UHG's Active Directory")
                     flash(userinput, "ad_notfound")
                     if request.url in VALID_REDIRECT:
-                        return redirect (request.url)
+                        return redirect(request.url)
                 else:  # Error w/ Active Directory API notifing the user to open a ticket
-                    logging.error("The following error occurd with AD API: " + fName_code + ": " + lName_message + "for " + userinput)
+                    logging.error("The following error occurd with AD API: " +
+                                  fName_code + ": " + lName_message + "for " + userinput)
                     flash(userinput, "adFail")
                     if request.url in VALID_REDIRECT:
                         return redirect(request.url)
@@ -759,8 +771,10 @@ def signcheck():
                 return redirect(request.url)
     # Loads Orign HTML Template for Webpage
     return render_template("client/request_access.html")
-# End Request Page____________________________________________________________________________________________________________________________________________________
 
+#********************************************
+# Find Admin Page
+#********************************************
 @app.route("/find-admin", methods=["GET", "POST"])
 def findadmin():
     "This webpage is for users who don't know who their admin is"
@@ -768,7 +782,7 @@ def findadmin():
         '-----------------------    FIND ADMIN PAGE    --------------------------------')
 
     # make a instance (object) of the class and use instance methods from now on
-    ad = AcrobatData(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
+    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
                      # This file stores all AD users in the dtm_esignature security group
                      users_esignatures_file="data_files/dtm_esignature_users.csv")
     # This creates a group list that will be used to populate the search dropdown and validate the user input
