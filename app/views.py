@@ -198,8 +198,7 @@ class eSignature(object):
 
 
     def groupCheck(self, userID):
-        "This function takes the user ID and runs it in an API call that returns (groupId (string); groupName (string); createdDate (date, optional); isDefaultGroup (boolean, optional)"
-
+        '''Get group name and Id for all users group'''
         # API call to Adobe: USER/{USERID}/GROUPS
         url = "https://" + host + endpoint + "/users/" + userID + "/groups"
 
@@ -238,7 +237,7 @@ class eSignature(object):
 
 
     def usersInGroup(self, groupID, groupName):
-        "This function takes the Group ID(s) and runs it in an API call that returns (email (string):id (string): isGroupAdmin (boolean): company (string, optional): firstName (string, optional): lastName (string, optional):"
+        '''Call to get users from a Adobe Sign group'''
         # API call to Adobe: GROUPS/{GROUPID}/USERS
         # # # This only works if our Group Sizes stay under 5k
         url = "https://" + host + endpoint + "/groups/" + \
@@ -280,7 +279,7 @@ class eSignature(object):
 
 
     def activeDirectoryCheck(self, email):
-        "This function checks active directory to see the user is part of the required security group in Active Directory"
+        '''Call to UHG's Active Directory validate users email and get user data'''
         acrobat_sign_config = 'acrobatsign.config'
         config = RawConfigParser()
         config.read(acrobat_sign_config)
@@ -357,6 +356,7 @@ class eSignature(object):
 
 
     def jwt_token():
+        '''Get JSON web token for UMAPI'''
         # read confg file
         config_file_name = "acrobatsign.config"
         config = RawConfigParser()
@@ -438,7 +438,7 @@ class eSignature(object):
 
 
     def savejwt(webtoken, expired_time):
-        "This function saves the JWT token and expiration of token to a file for reusage until it expires"
+        '''Saves JWT token and expiration of token to a file for reusage'''
         # .ini file allows us to write to the file without the sever restarting ("unlike .config files")
         config_file_name = "count.ini"
 
@@ -451,7 +451,7 @@ class eSignature(object):
 
 
     def createUser(self, email, fName, lName):
-        "This function creates a federated ID in UHG's Adobe Sign console with group assignment to dtm_esignature"
+        '''Creates a federated ID in UHG's Adobe Sign console with group assignment to dtm_esignature'''
         config_file_name = "acrobatsign.config"
         config = RawConfigParser()
         config.read(config_file_name)
@@ -507,7 +507,7 @@ class eSignature(object):
 
 
     def send_email(self, email):
-        "This function will send a welcom email to newly onboarded users of Adobe Acrobat Sign"
+        ''' Sends a welcome email to newly onboarded users of Adobe Acrobat Sign'''
         msg = EmailMessage()
         msg['Subject'] = 'Adobe Acrobat Sign Access Notification'
         msg['From'] = 'esignaturedtm@optum.com'
@@ -530,7 +530,7 @@ class eSignature(object):
 
 
     def creategrouplist(self):
-        "this function creates a list of groups in Adobe Acrobat Sign"
+        '''Creates a list of all groups in Adobe Acrobat Sign'''
 
         url = "https://" + host + endpoint + "/groups" + "?pageSize=750"
 
@@ -566,7 +566,7 @@ class eSignature(object):
         return grouplist, counter
 
     def grouplist(self, groupName):
-        "Using group Name get group ID"
+        '''Gets the group ID for a specific group'''
         url = "https://" + host + endpoint + "/groups" + "?pageSize=750"
 
         payload = {}
@@ -942,15 +942,3 @@ def findadmin():
 def openticket():
     "This is the weppage users will visit to open one of the following tickets (Incident, Net New, Enhancement)"
     return render_template("client/openticket.html")
-
-
-@app.route("/admin")
-def admin():
-    "This is the beginning of our admin page which may grow to something more"
-    return render_template("admin/admin.html")
-
-
-@app.route("/testing")
-def testing():
-    "This is our automated test scripts page which is used for releases or testing with groups"
-    return render_template("admin/automated_testing.html")
