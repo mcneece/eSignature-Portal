@@ -12,7 +12,6 @@ import pandas as pd  # for reading csv files (domains, AD group backup file)
 import json  # for capturing JSON data in Adobe API calls
 import requests  # for making API call to Adobe
 from app import app  # for running Flask app
-from requests import packages # For all API calls
 import urllib3 # for Active Directory API calls
 from flask import render_template, request, redirect, flash
 from configparser import ConfigParser # for reading in values from config and .ini files
