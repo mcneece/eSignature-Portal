@@ -23,4 +23,3 @@ ACCESSUSAGECOUNT_MONTH = int(config.get("usage_count", "request_month")) # This 
 FINDADMINUSAGECOUNT_MONTH = int(config.get("usage_count", "admin_month")) # This will be logged to see how often the FIND AMIN API is used every month
 
 from app import views
-from app import admin_views

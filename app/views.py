@@ -615,8 +615,7 @@ def requestaccess():
         '-----------------------    REQUEST ACCESS PAGE    --------------------------------')
     "This webpage is for running the Adobe Acrobat Sign Access Check for Users"
     # make a instance (object) of the class and use instance methods from now on
-    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv",
-                     users_esignatures_file="data_files/dtm_esignature_users.csv")
+    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv")
 
     # Read config file for writting globals to config
     config_object = ConfigParser()
