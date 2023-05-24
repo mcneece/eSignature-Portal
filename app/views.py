@@ -780,9 +780,7 @@ def findadmin():
         '-----------------------    FIND ADMIN PAGE    --------------------------------')
 
     # make a instance (object) of the class and use instance methods from now on
-    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv",  # This file stores all claimed domains
-                     # This file stores all AD users in the dtm_esignature security group
-                     users_esignatures_file="data_files/dtm_esignature_users.csv")
+    ad = eSignature(claimed_domains_file="data_files/claimed_domains.csv") # This file stores all claimed domains
     # This creates a group list that will be used to populate the search dropdown and validate the user input
     grouplist, count = ad.creategrouplist()
     logging.info(f'We have {count} groups')
