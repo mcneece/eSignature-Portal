@@ -27,7 +27,6 @@
 2. [ Open Ticket. ](#ticket)
 3. [ Request Access. ](#request)
 4. [ Group Admin Check. ](#admin)
-5. [ Cancel Agreements. ](#cancel)
 
 <a name="home"></a>
 ## 1. Home Page
@@ -44,7 +43,7 @@ The training material is Adobe's Helpx articles and videos curated by their supp
 This is just a simple paragraph that introduces the user to Acrobat Sign and eSignature for UHG. It lets the user understand that this product is for capturing eSignatures which can help reduce postage costs, paper footprints, automate routing, and expedite the signature process.
     
 #### UHG's Acrobat Sign Links:
-The Acrobat Sign links are simply just HTML buttons that host the most update to date links to UHG's Acrobat Sign product. Currently UHG has an intranet page that potential users come access that has outdated links that the support team cannot access. These links are outdated due to a DNS migration in 2022. By hosting the links on a tool developed by the eSign support team a member of that team can easily change the HTML buttons during a future DNS migration so that end users are accessing proper links. This is done by simply changing the 'href=#' link.
+The Acrobat Sign links are simply just HTML buttons that host the most up to date links to UHG's Acrobat Sign product. This was extremely helpful in the DNS migration in 2022 when Adobe changed the webUI link from echosign to adobesign. By hosting the links on a tool developed by the eSign support team a member of that team can easily change the HTML buttons so that end users are accessing proper links.
 
 <a name="ticket"></a>
 ## 2. Open a Ticket
@@ -97,8 +96,3 @@ The search by group takes a group name and runs it through a script to find all 
 The search by email takes a user input (an email representing a colleague who they wish to mimic their access) and runs it against a python function that checks if the username and domain are valid as well as if the domain is claimed in UHG's acrobat sign console. If the validation fails the user is alerted and they should try again. If not, the email is run against an API call to see if that email matches an existing user. If there is no match the user is alerted and asked to try another email or search by group name. If there is a match then the user ID is pulled and ran against another API call to see if they're part of an existing group. If they are not (then they are part of default group) the user is notified that the email is an active user but don't have the necessary group access requeired. On the other hand, if they are part of a group, that group ID is pulled and used in another API call. That API call finds all the users in that group and pulls supporting data about if they are a group admin or not. All users that are group admins are added to a dictionary with their email.
     
 <img src="Docs/readme_imgs/find-admin-email_screen.png">
-
-<a name="cancel"></a>
-## 5. Cancel Agreements
-
-This functionality is coming soon but not live on the eSignature Portal. This will allow users to cancel agreements in bulk with an agreement ID. In concept it will loop and run multiple API calls for each ID and cancel them.
