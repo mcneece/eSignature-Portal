@@ -26,7 +26,8 @@
 1. [ Home Page. ](#home)
 2. [ Open Ticket. ](#ticket)
 3. [ Request Access. ](#request)
-4. [ Group Admin Check. ](#admin)
+4. [ Welcome Email. ](#email)
+5. [ Group Admin Check. ](#admin)
 
 <a name="home"></a>
 ## 1. Home Page
@@ -37,7 +38,7 @@ The Home page of the eSignature Support Portal hosts training material and a hig
 <img src="Docs/readme_imgs/home_screen.png">
 
 #### Training Material:
-The training material is Adobe's Helpx articles and videos curated by their support team. The helpx training videos and articles are maintained by Adobe and open to the public. The training videos which can be accessed by clicking 'watch videos' on the eSignature Support Portal are easily consumable since they are 2-4 minutes in length. These videos can be anything from setting up agreement routing to creating a workflow. While the beginners guide is a HTML file that helps a new user setup and start using Adobe Acrobat Sign for the first time, it focuses on setting up your signature and updating your user profile and other beginning processes to setup a user for success with the tool.
+The training material is Adobe's Helpx articles and experience league videos curated by their support team. The training videos and articles are maintained by Adobe and open to the public. The training videos which can be accessed on the eSignature Support Portal are easily consumable since they are 2-4 minutes in length. These videos can be anything from setting up agreement routing to creating a workflow. This videos are extremely helpful to our organization to reduce tickets caused by customer knowledge gaps for tasks in Adobe Acrobat Sign.
     
 #### High Level Overview of Acrobat Sign:
 This is just a simple paragraph that introduces the user to Acrobat Sign and eSignature for UHG. It lets the user understand that this product is for capturing eSignatures which can help reduce postage costs, paper footprints, automate routing, and expedite the signature process.
@@ -77,17 +78,26 @@ When requesting Acrobat Sign a user must be added to a security group in Active 
 The original goal of this tool was to verify where a user is in the request process, but has since grown to include additional functionality. The verify request tool goes through several checks using python functions to see where the user is in the request process. It takes a user's email and first verifies that the email entered a valid email (valid username and domain). During the valid email check, the function also runs the domain against a list of claimed domains in the UHG console (using a CSV file) to ensure the domain is claimed. If the domain is not claimed the user cannot get access to Acrobat Sign (no exceptions), otherwise the tool continues on. After that check passes, an API call is made to Adobe to verify if the email entered exist in Acrobat Sign. If it does, it will check the group the user is in using another API call. By default, users originally previsioned in Acrobat Sign are assigned to the 'default group', if the user is in the default group then the UI flashes the user an alert, and suggests that they use another tool in the portal to find an admin (find admin tool) to get them assigned to a group. If the user is not in the default group that means they have access and the UI flashes an alert notifying them that they have the required access necessary, and to go ahead and login. If the email is not found by the API but passed the email validation then the tool checks if they are part of the required security group that must be request via Secure. If they are part of the security group then a rare error has occurred (user not in Acrobat but is part of security group), the UI then flashes and alert to open an incident ticket with our support team. If they are not part of the security group then the UI flashes instructions to submit the required Secure request.
 
 <img src="Docs/readme_imgs/request-verify_screen.png">
-    
+
+<a name="email"></a>
+## 4. Welcome Email
+
+#### Overview:
+
+The welcome email is a tool for our support team to provide feedback to the customer that their account has indeed been created for UHG's instance of Adobe Acrobat Sign, and that their is aditional actions that need to be taken including getting added to a group by a group admin and doing the currated Adobe Sign beginner course in Adobe's experience league. The group admin tool described in the next section is linked in the email helping persuade the usesr to start their before reaching out to the internal support team. And as mentioned above the training is fed to the user to curb users knowledge gaps.
+
+<img src="Docs/readme_imgs/welcome-email.png">
+
 <a name="admin"></a>
-## 4. Group Admin Check
+## 5. Group Admin Check
 
 #### Overview:
     
-The group admin check is a tool used to find a business's group admin. There are 350+ businesses that utilize UHG's Acrobat Sign account. Because of the volume of users and groups it isn't feasible for the support team to manage these groups, because of that group management is self-service. Each group when onboarded to Acrobat Sign is assigned a group admin, these individuals manage the users being added to their group, the settings of the group, and are the point of contact for all things Acrobat Sign for their business. Because users are assigned to the default group when they first become provisioned to Acrobat Sign, they must contact their group admin to get access to a group that allows them to utilize Acrobat Sign. Typically, users don't know who that is but may know the group name or an email of a colleague who has the access they require. What the group admin tool does is runs several lines of code to match that group name or colleague email to information retrieved from API calls to Adobe to find their group admin. 
+The group admin check is a tool used to find a business's group admin. There are 350+ businesses that utilize Acrobat Sign for UHG. Because of the volume of users and groups it isn't feasible for the support team to manage group assignment, because of that group management is self-service. Each group when onboarded to Acrobat Sign is assigned at least one group admin, these individuals manage onboarding users in Adobe Acrobat Sign, the settings of the group, and are the point of contact for all things Acrobat Sign for their business. Because users are assigned to the default group (with limited access to functionality) when they first become provisioned to Acrobat Sign, they must contact their group admin to get access to a group that allows them to utilize Acrobat Sign. Typically, users don't know who that is but may know the group name or an email of a colleague who has the access they require. What the group admin tool does is runs several lines of code to match that group name or colleague email to information retrieved from API calls to Adobe to find their group admin. 
     
 #### Searching by Group:
 
-The search by group takes a group name and runs it through a script to find all the admins of that group. It starts by comparing the group name entered against a list of all groups retrieved by an Adobe rest API call. If there is a match it will take that group ID and run it against another API call, which returns all the users from that group along with other details about each user. If there is not a match it notifies the user to try another group name or search by email. One of the details pulled by the previous API call is a value for is a group admin (true or false), if the group name matches. If true then it will save that user's email to a dictionariy and flash an Alert on the UI notifying the user of all admins in that group they could contact (you can have more than one group admin).
+The search by group takes a group name and runs it through a script to find all the admins of that group. It starts by comparing the group name entered against a list of all groups retrieved by an Adobe rest API call. If there is a match it will take that group ID and run it against another API call, which returns all the users from that group along with other details about each user. If there is not a match it notifies the user to try another group name or search by email. One of the details pulled by the previous API call is group admin boolean value (true or false). If the boolean is true then it will save that user's email to a dictionariy and flash an Alert on the UI notifying the user of all admins in that group they could contact (you can have more than one group admin).
 
 <img src="Docs/readme_imgs/find-admin_screen.png">
 
