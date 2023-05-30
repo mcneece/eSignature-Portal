@@ -99,10 +99,6 @@ The group admin check is a tool used to find a business's group admin. There are
 
 The search by group takes a group name and runs it through a script to find all the admins of that group. It starts by comparing the group name entered against a list of all groups retrieved by an Adobe rest API call. If there is a match it will take that group ID and run it against another API call, which returns all the users from that group along with other details about each user. If there is not a match it notifies the user to try another group name or search by email. One of the details pulled by the previous API call is group admin boolean value (true or false). If the boolean is true then it will save that user's email to a dictionariy and flash an Alert on the UI notifying the user of all admins in that group they could contact (you can have more than one group admin).
 
-<img src="Docs/readme_imgs/find-admin_screen.png">
-
 #### Searching by Email:
     
 The search by email takes a user input (an email representing a colleague who they wish to mimic their access) and runs it against a python function that checks if the username and domain are valid as well as if the domain is claimed in UHG's acrobat sign console. If the validation fails the user is alerted and they should try again. If not, the email is run against an API call to see if that email matches an existing user. If there is no match the user is alerted and asked to try another email or search by group name. If there is a match then the user ID is pulled and ran against another API call to see if they're part of an existing group. If they are not (then they are part of default group) the user is notified that the email is an active user but don't have the necessary group access requeired. On the other hand, if they are part of a group, that group ID is pulled and used in another API call. That API call finds all the users in that group and pulls supporting data about if they are a group admin or not. All users that are group admins are added to a dictionary with their email.
-    
-<img src="Docs/readme_imgs/find-admin-email_screen.png">
