@@ -94,7 +94,9 @@ The welcome email is a tool for our support team to provide feedback to the cust
 #### Overview:
     
 The group admin check is a tool used to find a business's group admin. There are 350+ businesses that utilize Acrobat Sign for UHG. Because of the volume of users and groups it isn't feasible for the support team to manage group assignment, because of that group management is self-service. Each group when onboarded to Acrobat Sign is assigned at least one group admin, these individuals manage onboarding users in Adobe Acrobat Sign, the settings of the group, and are the point of contact for all things Acrobat Sign for their business. Because users are assigned to the default group (with limited access to functionality) when they first become provisioned to Acrobat Sign, they must contact their group admin to get access to a group that allows them to utilize Acrobat Sign. Typically, users don't know who that is but may know the group name or an email of a colleague who has the access they require. What the group admin tool does is runs several lines of code to match that group name or colleague email to information retrieved from API calls to Adobe to find their group admin. 
-    
+
+<img src="Docs/readme_imgs/find-admin.png">
+
 #### Searching by Group:
 
 The search by group takes a group name and runs it through a script to find all the admins of that group. It starts by comparing the group name entered against a list of all groups retrieved by an Adobe rest API call. If there is a match it will take that group ID and run it against another API call, which returns all the users from that group along with other details about each user. If there is not a match it notifies the user to try another group name or search by email. One of the details pulled by the previous API call is group admin boolean value (true or false). If the boolean is true then it will save that user's email to a dictionariy and flash an Alert on the UI notifying the user of all admins in that group they could contact (you can have more than one group admin).
