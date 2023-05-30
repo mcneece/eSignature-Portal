@@ -6,7 +6,7 @@
 
 ### Adobe Sign Entitlement Simplified
 
-<p>Adobe Acrobat Sign offers a few different account management solutions, but there were limitations with each due to UHG's account auditing requirements and employee infrastructure. Because of this the there were sacrafices made in the user experience for user account provisioning that caused a large spike in Optum eSignature support tickets ( from 2020- to 2023). To remediate this the client portal uses API's with Adobe Sign, Adobe's Admin Console (UMAPI), ServiceNow, and Active Directory to automate user account provisioning in a manner that gives the user the best possible experience and comunicates between all of several cloud services to meet UHG's auditing and employee infrastructure requirements.</p>
+<p>Adobe Acrobat Sign offers a few different account management solutions, but there were limitations with each due to UHG's account auditing requirements and employee infrastructure. Because of this the there were sacrafices made in the user experience for user account provisioning that caused a large spike in Optum eSignature support tickets (from 2020- to 2023). To remediate this the client portal uses API's with Adobe Sign, Adobe's Admin Console (UMAPI), ServiceNow, and Active Directory to automate user account provisioning in a manner that gives the user the best possible experience and comunicates between all of several cloud services to meet UHG's auditing and employee infrastructure requirements.</p>
 <ul>This includes:
     <li>Taking in a user's business email and validating its format and domain to ensure it is claimed by our organization</li>
     <li>Validating user credentials and status in Active Directory using AD APIs</li>
