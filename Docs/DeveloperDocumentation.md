@@ -4,12 +4,7 @@ The eSignature Support Portal was built to service UnitedHealth Group's employee
 
 # Structure of the project:
 
-The project is primarily python and HTML files with some JavaScript. The run.py file communicates with the views.py and the admin_views.py files to run the project based on configurations from the config.py file in a users preferred browser. Right now there is little to no code in the admin_views file as this is something that will be developed in the future to create functionality only for the operations support team (ex: a dashboard for admin related metrics). So all of the current project runs through the views.py file. In this file you will see the imported python functions at the top that are required for this project and as you scroll down you will see some methods that the file uses to process certain functionality, then lastly you will see the containers for each webpage. This will be reviewed later in this document under the product flow section. When it comes to using visuals the static folder holds all the images, css, and JavaScript for the project. While the templates folder has all of the HTML files required to give the user a GUI that works with the views.py file.
-
-
-# Additional Install Requirements
-
-After the repository has been cloned and the config.py file is copied from the user guid, you will still need to login to Adobe Acrobat Sign to obtain the required Adobe request URLs for API calls as well as access tokens required for your API call. Since different organization run on different servers the request URLs will be different depending on what organization is running the tool. This all will be configured in the config.py file which is hidden from the repository by the .gitignore file.
+The project is primarily python and HTML files with some JavaScript. The run.py file communicates with the views.py file to run the project based on configurations from the config.py. 99% of the current project runs through the views.py file. In this file you will see the imported python functions at the top that are required for this project and as you scroll down you will see some methods that the file uses to process certain functionality, then lastly you will see the containers for each webpage. This will be reviewed later in this document under the product flow section. When it comes to using visuals the static folder holds all the images, css, and JavaScript for the project. While the templates folder has all of the HTML files required to give the user a GUI that works with the views.py file.
 
 ## Request URL:
 	The request url can be found by completing the following steps:
@@ -77,13 +72,9 @@ When searching by group a user inputs a group name that group name is ran agains
 
 Similar to search by group a user input is ran against information retrieved by an API call this time GET /users/{email}/usersByEmail. If there is a match that users ID is ran against to GET groups API call to capture the admins in a python dictionary. If the user is part of multiple groups then the dictionary will be nested with each group name at level one and under each group name is list of admins. The admins will be returned to the user with their email which is retrieved from the GET groups/{group id}/users.
 
-
-
-
-
 # Known Issues
 
-Currently the only known issue is if the user types in a invalid email they are not alerted. This is something that was not finished due to time constraints.
+
 
 # Future Work
 
