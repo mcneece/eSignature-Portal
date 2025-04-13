@@ -1,6 +1,6 @@
 <img src="Docs/readme_imgs/icon.png" align="right" />
 
-# Optum eSignature Support Portal
+# eSignature Support Portal
 
 <p>The eSignature Support Portal was created to service UnitedHealth Group's employees with their eSignature support needs. The goal of the tool is to automate solutions for common service requests to the internal Optum eSignature Support Team, and give employees access to vital information and functionality in a simplified manner so that they can be self-sufficient when utilizing eSignature for their business(es).</p>
 
